@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+ <head>
+  <meta charset="utf-8">
+  <title>Value parser demo</title>
+  <script type="text/javascript" src="jquery-1.8.1.min.js"></script>          
+  <script type="text/javascript" src="json2.js"></script>          
+  <script type="text/javascript">                                         
+result = {};
+$(document).ready(function() {
+	$('#in').bind('input', function() {
+		$.getJSON('parser.php', {'val' : $('#in').val(), 'datatype' : $('input[name=datatype]:checked').val() }, function(data) {
+			$('#all').text(JSON.stringify(data, null, 2));
+			$('#out').text(data.result);
+			result = data;
+		});
+	});
+});
+  </script>                                                               
+ </head>
+ <body>
+  <h1>Number</h1>
+   <p>
+    We assume that the selected property is something like <em>height</em>, i.e. a
+    dimension measured in metres.
+   </p>
+   <form>
+    <input type="radio" name="datatype" value="item">Items (10 Mio)</input>
+   <input type="radio" name="datatype" value="number" checked>Number (16 Mio + 400k Quantities + 200k Currencies)</input>
+   <input type="radio" name="datatype" value="time">Time (2.5 Mio)</input>
+   <input type="radio" name="datatype" value="geo">Geo (3 Mio)</input>
+   <input type="radio" name="datatype" value="string">String (?)</input>
+   <input type="radio" name="datatype" value="timeinterval">Time interval (80k)</input>
+   <input type="radio" name="datatype" value="numberinterval">Number interval (?)</input>
+   <br>
+   <input type="text" id="in" name="in" autofocus placeholder="Test your value here" />
+  </form>
+  <p><strong><div id="out">result</div></strong></p>
+  <pre id="all">For the JSON structure see also in your JS console the variable result</pre>
+ </body>
+</html>
