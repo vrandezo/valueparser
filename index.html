@@ -8,13 +8,19 @@
   <script type="text/javascript">                                         
 result = {};
 $(document).ready(function() {
-	$('#in').bind('input', function() {
-		$.getJSON('parser.php', {'val' : $('#in').val(), 'datatype' : $('input[name=datatype]:checked').val() }, function(data) {
+	var update = function() {
+		$.getJSON('parser.php', {'val' : $('#in').val(), 'datatype' : 'number', 'unit' : $('#unit').val() }, function(data) {
 			$('#all').text(JSON.stringify(data, null, 2));
-			$('#out').text(data.result);
+			$('#unit').val(data.result.unit);
 			result = data;
+			out = data.result.quantityvalue + '&plusmn;' + data.result.upperuncertainty + ' ' + data.result.unit;
+			out += '<br>';
+			out += data.result.otherunit.quantityvalue + '&plusmn;' + data.result.otherunit.upperuncertainty + ' ' + data.result.otherunit.unit;
+			$('#out').html(out);
 		});
-	});
+	}
+	$('#in').bind('input', update);
+	$('#unit').bind('change', update);
 });
   </script>                                                               
  </head>
@@ -25,17 +31,14 @@ $(document).ready(function() {
     dimension measured in metres.
    </p>
    <form>
-    <input type="radio" name="datatype" value="item">Items (10 Mio)</input>
-   <input type="radio" name="datatype" value="number" checked>Number (16 Mio + 400k Quantities + 200k Currencies)</input>
-   <input type="radio" name="datatype" value="time">Time (2.5 Mio)</input>
-   <input type="radio" name="datatype" value="geo">Geo (3 Mio)</input>
-   <input type="radio" name="datatype" value="string">String (?)</input>
-   <input type="radio" name="datatype" value="timeinterval">Time interval (80k)</input>
-   <input type="radio" name="datatype" value="numberinterval">Number interval (?)</input>
-   <br>
-   <input type="text" id="in" name="in" autofocus placeholder="Test your value here" />
-  </form>
-  <p><strong><div id="out">result</div></strong></p>
+    <input type="text" id="in" name="in" autofocus placeholder="Test your value here" />
+    <select id="unit">
+     <option>meter</option>
+     <option>feet</option>
+     <option>yard</option>
+    </select>
+   </form>
+  <p><div id="out">result</div></p>
   <pre id="all">For the JSON structure see also in your JS console the variable result</pre>
  </body>
 </html>
