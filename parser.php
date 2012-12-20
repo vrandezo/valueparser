@@ -1,7 +1,10 @@
 <?php
-$input = $_GET["val"];
-$type = $_GET["datatype"];
-$unit = $_GET["unit"];
+$input = $_GET['val'];
+$type = $_GET['datatype'];
+$unit = $_GET['unit'];
+$upper = $_GET['upper'];
+$lower = $_GET['lower'];
+$autocertainty = $_GET['autocertainty'];
 
 $result = '';
 $error = '';
@@ -9,7 +12,7 @@ $error = '';
 if ($type == "string") {
 	$result = parseString($input);
 } else if ($type == "number") {
-	list($result, $error) = parseNumber($input, $unit);
+	list($result, $error) = parseNumber($input, $unit, $autocertainty, $upper, $lower);
 } else if ($type == "geo") {
 	$result = parseGeo($input);
 } else if ($type == "time") {
@@ -25,21 +28,29 @@ if ($error != '') { $answer .= ', "error" : "' . $error . '"'; }
 $answer .= '}';
 echo $answer;
 
-function parseNumber($x, $unit) {
+function parseNumber($x, $unit, $autocertainty, $upper, $lower) {
 	$error = '';
 	list($number, $rest, $sigfig, $order) = readNumber($x);
 
-	if (in_array($rest, array('ft', 'feet', "'"))) {
-		$unit = "feet";
-	} else if (in_array($rest, array('yd', 'yard'))) {
-		$unit = "yard";
-	} else if (in_array($rest, array('m', 'meter', 'metre'))) {
-		$unit = "meter";
+	if (in_array($rest, array('ft', 'feet', "'", 'foot'))) {
+		$unit = 'feet';
+	} else if (in_array($rest, array('yd', 'yard', 'yards'))) {
+		$unit = 'yard';
+	} else if (in_array($rest, array('m', 'meter', 'metre', 'meters', 'metres'))) {
+		$unit = 'meter';
+	} else if (in_array($rest, array('km', 'kilometer', 'kilometre', 'kilometres', 'kilometers'))) {
+		$unit = 'km';
+	} else if (in_array($rest, array('mile', 'miles', 'mi'))) {
+		$unit = 'miles';
+	} else if (in_array($rest, array('cm', 'centimeter', 'centimetre', 'centimeters', 'centimetres'))) {
+		$unit = 'cm';
+	} else if (in_array($rest, array("''", 'inch', 'inches'))) {
+		$unit = 'inch';
 	} else {
 		$error .= "  unrecognized unit designation  ";
 	}
 
-	$upper = $lower = pow(10, $order-$sigfig+1);
+	if ($autocertainty=='true') $upper = $lower = pow(10, $order-$sigfig+1);
 	
 	$otherunit = 'other';
 	$othernumber = 0;
@@ -54,6 +65,18 @@ function parseNumber($x, $unit) {
 	} else if ($unit == 'yard') {
 		$otherunit = 'meter';
 		$factor = 0.9144;
+	} else if ($unit == 'km') {
+		$otherunit = 'miles';
+		$factor = 0.621371192;
+	} else if ($unit == 'miles') {
+		$otherunit = 'km';
+		$factor = 1.609344;
+	} else if ($unit == 'cm') {
+		$otherunit = 'inch';
+		$factor = 0.3937;
+	} else if ($unit == 'inch') {
+		$otherunit = 'cm';
+		$factor = 2.54;
 	}
 	$o = convertUnitSoft($number, $upper, $lower, $factor);
 	$exactnumber = $o[0];
@@ -111,8 +134,10 @@ function convertUnitSoft($number, $upper, $lower, $factor) {
 
 function convertUnitHard($number, $upper, $lower, $sigfig, $factor) {
 	$othernumber = roundSigFig($number*$factor, $sigfig);
-	$otherupper = roundSigFig($upper*$factor, 1);
-	$otherlower = roundSigFig($lower*$factor, 1);
+	$roundedDigits = ceil(log($othernumber, 10)) - $sigfig;
+	$minUncertainty = pow(10, $roundedDigits);
+	$otherupper = max(roundSigFig($upper*$factor, 1), $minUncertainty);
+	$otherlower = max(roundSigFig($lower*$factor, 1), $minUncertainty);
 	return array($othernumber, $otherupper, $otherlower);
 };
 
@@ -133,7 +158,7 @@ function readNumber($x) {
 	$sigfig = 0;
 	$postdot = 0;
 	$rest = '';
-	for ($i=0; $i <= strlen($x); $i++) {
+	for ($i=0; $i < strlen($x); $i++) {
 		$c = $x[$i];
 		if (is_numeric($c)) {
 			$number *= 10;
@@ -174,5 +199,6 @@ function readNumber($x) {
 	return array($number, $rest, $sigfig, $order);
 };
 
+parseNumber('22', 'meter', true, '1', '1');
 //list($number, $rest, $sigfig, $order) = readNumber('123000 m');
 //echo "\n$number $rest $sigfig $order\n";

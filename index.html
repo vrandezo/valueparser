@@ -4,27 +4,83 @@
   <meta charset="utf-8">
   <title>Value parser demo</title>
   <script type="text/javascript" src="jquery-1.8.1.min.js"></script>          
-  <script type="text/javascript" src="json2.js"></script>          
+  <script type="text/javascript" src="json2.js"></script>        
   <script type="text/javascript">                                         
 result = {};
 $(document).ready(function() {
 	var update = function() {
-		$.getJSON('parser.php', {'val' : $('#in').val(), 'datatype' : 'number', 'unit' : $('#unit').val() }, function(data) {
+		$.getJSON('parser.php', {
+			'val' : $('#in').val(),
+			'datatype' : 'number',
+			'unit' : $('#unit').val(),
+			'upper' : $('#upper').val(),
+			'lower' : $('#lower').val(),
+			'autocertainty' : $('#autocertainty').is(':checked')
+		}, function(data) {
+			$('#unit').show();
+			$('#moresig').show();
+			$('#lesssig').show();
+			if ($('#autocertainty').is(':hidden')) $('#details').show();
 			$('#all').text(JSON.stringify(data, null, 2));
 			$('#unit').val(data.result.unit);
 			result = data;
-			out = data.result.quantityvalue + '&plusmn;' + data.result.upperuncertainty + ' ' + data.result.unit;
+			out = '';
+			if (data.result.upperuncertainty == data.result.loweruncertainty) {
+				out += '<span style="font-size:200%">' + data.result.quantityvalue + ' ' + data.result.unit + '</span> &plusmn;' + data.result.upperuncertainty + ' ' + data.result.unit;
+			} else {
+				out += '<span style="font-size:200%">' + data.result.quantityvalue + ' ' + data.result.unit + '</span><span class="supsub" style="font-size:120%">';
+				out += '<sup class="superscript">+' + data.result.upperuncertainty + ' ' + data.result.unit + '</sup>';
+				out += '<sub class="subscript">-' + data.result.loweruncertainty + ' ' + data.result.unit + '</sub></span>';
+			}
 			out += '<br>';
-			out += data.result.otherunit.quantityvalue + '&plusmn;' + data.result.otherunit.upperuncertainty + ' ' + data.result.otherunit.unit;
+			if ((data.result.upperuncertainty == '0') && (data.result.loweruncertainty == '0')) {
+				out += 'Interval notation: ' + data.result.quantityvalue + ' ' + data.result.unit;
+			} else {
+				out += 'Interval notation: ' + (parseFloat(data.result.quantityvalue)-parseFloat(data.result.loweruncertainty)) + '&ndash;' + (parseFloat(data.result.quantityvalue)+parseFloat(data.result.upperuncertainty)) + ' ' + data.result.unit;
+			}
 			out += '<br>';
-			out += '(Exact: ' + data.result.exactconversion.quantityvalue + '&plusmn;' + data.result.exactconversion.upperuncertainty + ' ' + data.result.exactconversion.unit + ')';
+			out += 'Converted: ' + data.result.otherunit.quantityvalue + '&plusmn;' + data.result.otherunit.upperuncertainty + ' ' + data.result.otherunit.unit;
+			out += ' <em style="font-size:80%">(Exact: ' + data.result.exactconversion.quantityvalue + '&plusmn;' + data.result.exactconversion.upperuncertainty + ' ' + data.result.exactconversion.unit + ')</em>';
 			$('#out').html(out);
+			$('#upper').val(data.result.upperuncertainty);
+			$('#lower').val(data.result.loweruncertainty);
 		});
 	}
 	$('#in').bind('input', update);
 	$('#unit').bind('change', update);
+	$('#autocertainty').bind('change', update);
+	$('#upper').bind('input', update);
+	$('#lower').bind('input', update);
+	
+	$('#moresig').click(function() {
+		$('#autocertainty').prop('checked', false);
+		$('#upper').val($('#upper').val()/10);
+		$('#lower').val($('#lower').val()/10);
+		update();
+	});
+	$('#lesssig').click(function() {
+		$('#autocertainty').prop('checked', false);
+		$('#upper').val($('#upper').val()*10);
+		$('#lower').val($('#lower').val()*10);
+		update();
+	});
+	
+	$('#details').click(function() {
+		$('#uncertainty').show();
+		$('#details').hide();
+	});
+	$('#uncertainty').hide();
+	$('#unit').hide();
+	$('#moresig').hide();
+	$('#lesssig').hide();
+	$('#details').hide();
 });
-  </script>                                                               
+  </script>
+  <style>
+   .supsub {position: absolute}
+   .subscript {display:block; position:relative; left:2px; top: -5px}
+   .superscript {display:block; position:relative; left:2px; top: -5px}
+  </style>
  </head>
  <body>
   <h1>Number</h1>
@@ -33,14 +89,26 @@ $(document).ready(function() {
     dimension measured in metres.
    </p>
    <form>
-    <input type="text" id="in" name="in" autofocus placeholder="Test your value here" />
+    <input type="text" id="in" name="in" autofocus placeholder="Test your value here" style="font-size:200%" />
     <select id="unit">
      <option>meter</option>
      <option>feet</option>
      <option>yard</option>
+     <option>km</option>
+     <option>miles</option>
+     <option>cm</option>
+     <option>inch</option>
     </select>
+    <span id="moresig">[more precise]</span>
+    <span id="lesssig">[less precise]</span>
+    <span id="details">[details]</span>
+    <span id="uncertainty">
+     +<input type="text" id="upper" name="upper" />
+     -<input type="text" id="lower" name="lower" />
+     <input type="checkbox" id="autocertainty" name="autocertainty" checked="true" />&nbsp;auto-certainty
+    </span>
    </form>
-  <p><div id="out">result</div></p>
-  <pre id="all">For the JSON structure see also in your JS console the variable result</pre>
+  <p><div id="out"> </div></p>
+  <pre id="all">For the JSON structure see also in your JS console the variable &quot;result&quot;</pre>
  </body>
 </html>
