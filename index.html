@@ -16,6 +16,8 @@ $(document).ready(function() {
 			out = data.result.quantityvalue + '&plusmn;' + data.result.upperuncertainty + ' ' + data.result.unit;
 			out += '<br>';
 			out += data.result.otherunit.quantityvalue + '&plusmn;' + data.result.otherunit.upperuncertainty + ' ' + data.result.otherunit.unit;
+			out += '<br>';
+			out += '(Exact: ' + data.result.exactconversion.quantityvalue + '&plusmn;' + data.result.exactconversion.upperuncertainty + ' ' + data.result.exactconversion.unit + ')';
 			$('#out').html(out);
 		});
 	}
