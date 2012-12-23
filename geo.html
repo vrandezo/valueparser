@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+ <head>
+  <meta charset="utf-8">
+  <title>Value parser demo: Geolocation</title>
+  <script type="text/javascript" src="jquery-1.8.1.min.js"></script>          
+  <script type="text/javascript" src="json2.js"></script>        
+  <script type="text/javascript" src="geoparser.js"></script>        
+  <script type="text/javascript">                                         
+result = {};
+$(document).ready(function() {
+	var update = function() {
+		var toDegree = function(dec) {
+			var deg = Math.floor(dec);
+			var min = Math.floor((dec-deg)*60);
+			var sec = (dec-deg-min/60)*3600;
+			return deg + '°' + min + "'" + Math.round(sec*1000)/1000 + '"';
+		};
+		var input = $('#in').val();
+		var result = geoparser.parse(input);
+		var acc = result[2];
+		if (Math.abs(acc-1) < 0.0000001) {
+		  acc = 'to the degree';
+		} else if (Math.abs(acc-1/60) < 0.0000001) {
+		  acc = 'to the minute';
+		} else if (Math.abs(acc-1/3600) < 0.0000001) {
+		  acc = 'to the second';
+		} else if (Math.abs(acc-1/36000) < 0.0000001) {
+		  acc = 'to the tenth of a second';
+		} else if (Math.abs(acc-1/360000) < 0.0000001) {
+		  acc = 'to the hundredth of a second';
+		} else if (Math.abs(acc-1/3600000) < 0.0000001) {
+		  acc = 'to the thousandth of a second';
+		} else {
+		  acc = '&plusmn;' + acc + '°';
+		}
+		$('#acc').html(acc);
+		var lat = Math.round(result[0]*Math.pow(10, 10))/Math.pow(10, 10);
+		var ns = (lat >= 0) ? 'N' : 'S';
+		var lon = Math.round(result[1]*Math.pow(10, 10))/Math.pow(10, 10);
+		var ew = (lon >= 0) ? 'E' : 'W';
+		$('#dec').html(Math.abs(lat) + '°' + ns + ', ' + Math.abs(lon) + '°' + ew);
+		$('#deg').html(toDegree(Math.abs(lat)) + ns + ', ' + toDegree(Math.abs(lon)) + ew);
+	}
+	$('#in').bind('input', update);
+});
+  </script>
+  <style>
+	body {
+    	background: #fff;
+	    font: 100.01% "Fontin Sans", Fontin-Sans, "Myriad Pro", "Lucida Grande", "Lucida Sans Unicode", Lucida, Verdana, Helvetica, sans-serif;
+    	color: #000;
+	    margin: 20px 20px 40px 40px;
+    	padding: 0;
+	    text-align: left;
+	}
+  </style>
+ </head>
+ <body>
+  <h1>Geo location</h1>
+   <p>
+    Enter here a geo location.
+   </p>
+   <form>
+    <input type="text" id="in" name="in" autofocus placeholder="Test your value here" style="font-size:200%" />
+    <br>
+    <span id="deg">0°N, 0°E</span>
+    <br>
+    <span id="dec">0°N, 0°E</span>
+    <br>
+    Accuracy: <span id="acc">to the degree</span>
+   </form>
+  <p><div id="out"> </div></p>
+  <pre id="all">For the JSON structure see also in your JS console the variable &quot;result&quot;</pre>
+  <p>The code is available on <a href="https://github.com/vrandezo/valueparser">Github</a>.</p<
+ </body>
+</html>

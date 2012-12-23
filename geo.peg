@@ -1,0 +1,48 @@
+start
+  =
+    ' '* latitude:val ' '* north:'N'i? south:'S'i? [, ]* longitude:val ' '* east:'E'i? west:'W'i? ' '* 
+    { 
+      var lat = (south!='')? latitude[0] * -1 : latitude[0];
+      var lon = (west!='')? longitude[0] * -1 : longitude[0];
+      var acc = Math.min(latitude[1], longitude[1]);
+      return [lat, lon, acc];
+    }
+
+val
+  = 
+    sign:[+-]?  full:integer '°'? ' '* min:integer dotsec:'\''? ' '* sec:integer postdot:postdot [\'\"]* '°'?
+    { 
+      var r = full + min/60 + sec/3600;
+      var acc = 1;
+      if (min>0) acc=1/60;
+      if (sec>0) acc=1/3600;
+      if (dotsec=='\'') {
+        r += (postdot[0]/3600);
+        if (postdot[1]>0) acc = (1/3600)/Math.pow(10, postdot[1]);
+      } else {
+        r += postdot[0];
+        if (postdot[1]>0) acc = 1/Math.pow(10, postdot[1]);
+      }
+      if (sign=='-') r *= -1;
+      return [r, acc];
+    }
+
+postdot
+  = 
+    dot:'\.'? digits:[0-9]*
+    { 
+      if (dot=='') return [0, 0];
+      var t = '.' + digits.join('').toString();
+      var r = parseFloat(t, 10);
+      if (isNaN(r)) return [0, 0];
+      var acc = t.length - 1;
+      return [r, acc];
+    }
+
+integer
+  = digits:[0-9]*
+    {
+      var r = parseInt(digits.join(''), 10);
+      if (isNaN(r)) return 0;
+      return r;
+    }
