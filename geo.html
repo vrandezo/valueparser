@@ -11,8 +11,8 @@ result = {};
 $(document).ready(function() {
 	var update = function() {
 		var toDegree = function(dec) {
-			var deg = Math.floor(dec);
-			var min = Math.floor((dec-deg)*60);
+			var deg = Math.floor(dec+0.00000001);
+			var min = Math.floor((dec-deg+0.000001)*60);
 			var sec = (dec-deg-min/60)*3600;
 			return deg + '°' + min + "'" + Math.round(sec*1000)/1000 + '"';
 		};
