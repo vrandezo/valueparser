@@ -33,11 +33,12 @@ $(document).ready(function() {
 		} else if (Math.abs(acc-1/3600000) < 0.0000001) {
 		  acc = 'to the thousandth of a second';
 		} else {
+		  if (acc < 9e-10) acc = 1e-9;
 		  acc = '&plusmn;' + acc + '°';
 		}
 		$('#acc').html(acc);
 		
-		d = 6;
+		d = 9;
 		var lat = Math.round(result[0]*Math.pow(10, d))/Math.pow(10, d);
 		var ns = (lat >= 0) ? 'N' : 'S';
 		var lon = Math.round(result[1]*Math.pow(10, d))/Math.pow(10, d);
