@@ -782,18 +782,23 @@ geoparser.parse = function( text ) {
 	var data = {};
 	data.input = text;
 	var result = peggeoparser.parse(data.input);
+
 	data.latitude = { 'internal' : result[0]  };
-	data.latitude.direction = (data.latitude.internal < 0) ? geoparser.settings.south : geoparser.settings.north;
-	data.latitude = geoparser.toDegree(data.latitude);
-	data.latitude.decimaltext = Math.abs(data.latitude.internal) + geoparser.settings.degree + ' ' + data.latitude.direction;
 	data.longitude = { 'internal' : result[1] };
-	data.longitude.direction = (data.longitude.internal < 0) ? geoparser.settings.west : geoparser.settings.east;
-	data.longitude = geoparser.toDegree(data.longitude);
-	data.longitude.decimaltext = Math.abs(data.longitude.internal) + geoparser.settings.degree + ' ' + data.longitude.direction;
 	data.accuracy = { 'internal' : result[2] };
+
+	data.latitude.direction = (data.latitude.internal < 0) ? geoparser.settings.south : geoparser.settings.north;
+	data.latitude = geoparser.toDegree(data.latitude, data.accuracy.internal);
+	data.latitude.decimaltext = Math.abs(data.latitude.internal) + geoparser.settings.degree + ' ' + data.latitude.direction;
+
+	data.longitude.direction = (data.longitude.internal < 0) ? geoparser.settings.west : geoparser.settings.east;
+	data.longitude = geoparser.toDegree(data.longitude, data.accuracy.internal);
+	data.longitude.decimaltext = Math.abs(data.longitude.internal) + geoparser.settings.degree + ' ' + data.longitude.direction;
+
 	data.degreetext = data.latitude.degreetext + geoparser.settings.latlongcombinator + data.longitude.degreetext;
 	data.decimaltext = data.latitude.decimaltext + geoparser.settings.latlongcombinator + data.longitude.decimaltext;
 	data.accuracy.text = geoparser.accuracyText( data.accuracy.internal );
+
 	return data;
 };
 
@@ -817,12 +822,28 @@ geoparser.accuracyText = function( acc ) {
 	return text;
 };
 
-geoparser.toDegree = function(value) {
+geoparser.toDegree = function(value, accuracy) {
 	var val = Math.abs(value.internal);
 	value.degree = Math.floor(val+0.00000001);
-	value.minute = Math.floor((val-value.degree+0.000001)*60);
-	value.second = (val-value.degree-value.minute/60)*3600;
-	value.degreetext = value.degree + geoparser.settings.degree + value.minute + geoparser.settings.minute + Math.round(value.second*1000)/1000 + geoparser.settings.second + ' ' + value.direction;
+	if (accuracy > 0.9999999999) {
+		value.minute = undefined;
+	} else {
+		value.minute = Math.floor((val-value.degree+0.000001)*60);
+	}
+	if (accuracy > (0.9999999999/60)) {
+		value.second = undefined;
+	} else {
+		value.second = (val-value.degree-value.minute/60)*3600;
+		value.second = Math.round(value.second*1000)/1000
+	}
+	var text = function(number, sign) {
+		if (number == undefined) return '';
+		else return number + sign;
+	}
+	value.degreetext = text(value.degree, geoparser.settings.degree)
+		+ text(value.minute, geoparser.settings.minute)
+		+ text(value.second, geoparser.settings.second)
+		+ ' ' + value.direction;
 	return value;
 };
 

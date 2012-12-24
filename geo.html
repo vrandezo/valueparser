@@ -24,19 +24,19 @@ $(document).ready(function() {
 
 	$('#in').bind('input', update);
 	
-    var center = function(lat, lon) {
+    var center = function(lat, lon, zoom) {
 		map.setCenter(
 			new OpenLayers.LonLat(lon, lat).transform(
 				new OpenLayers.Projection("EPSG:4326"),
 				map.getProjectionObject()
-			)
+			), zoom
 		);
 	};
 	
     var map = new OpenLayers.Map('map');
     var layer = new OpenLayers.Layer.OSM( "Simple OSM Map" );
     map.addLayer(layer);
-    center(0,0);
+    center(0,0, 2);
 });
   </script>
   <style>
