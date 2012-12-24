@@ -5,7 +5,8 @@
   <title>Value parser demo: Geolocation</title>
   <script type="text/javascript" src="jquery-1.8.1.min.js"></script>          
   <script type="text/javascript" src="json2.js"></script>        
-  <script type="text/javascript" src="geoparser.js"></script>        
+  <script type="text/javascript" src="geoparser.js"></script>
+  <script src="http://openlayers.org/api/2.12/OpenLayers.js"></script>
   <script type="text/javascript">                                         
 result = {};
 $(document).ready(function() {
@@ -35,14 +36,32 @@ $(document).ready(function() {
 		  acc = '&plusmn;' + acc + '°';
 		}
 		$('#acc').html(acc);
-		var lat = Math.round(result[0]*Math.pow(10, 10))/Math.pow(10, 10);
+		
+		d = 6;
+		var lat = Math.round(result[0]*Math.pow(10, d))/Math.pow(10, d);
 		var ns = (lat >= 0) ? 'N' : 'S';
-		var lon = Math.round(result[1]*Math.pow(10, 10))/Math.pow(10, 10);
+		var lon = Math.round(result[1]*Math.pow(10, d))/Math.pow(10, d);
 		var ew = (lon >= 0) ? 'E' : 'W';
 		$('#dec').html(Math.abs(lat) + '°' + ns + ', ' + Math.abs(lon) + '°' + ew);
 		$('#deg').html(toDegree(Math.abs(lat)) + ns + ', ' + toDegree(Math.abs(lon)) + ew);
+		center(lat, lon);
 	}
 	$('#in').bind('input', update);
+	
+    var center = function(lat, lon) {
+		map.setCenter(
+			new OpenLayers.LonLat(lon, lat).transform(
+				new OpenLayers.Projection("EPSG:4326"),
+				map.getProjectionObject()
+			)
+		);
+	};
+	
+    var map, layer;
+    map = new OpenLayers.Map('map');
+    layer = new OpenLayers.Layer.OSM( "Simple OSM Map" );
+    map.addLayer(layer);
+    center(0,0);
 });
   </script>
   <style>
@@ -53,6 +72,14 @@ $(document).ready(function() {
 	    margin: 20px 20px 40px 40px;
     	padding: 0;
 	    text-align: left;
+	}
+	#in {
+		width: 500px;
+	}
+    .smallmap {
+    	width: 500px;
+		height: 300px;
+		border: 1px solid #ccc;
 	}
   </style>
  </head>
@@ -71,6 +98,7 @@ $(document).ready(function() {
     Accuracy: <span id="acc">to the degree</span>
    </form>
   <p><div id="out"> </div></p>
+  <div id="map" class="smallmap"></div>
   <pre id="all">For the JSON structure see also in your JS console the variable &quot;result&quot;</pre>
   <p>The code is available on <a href="https://github.com/vrandezo/valueparser">Github</a>.</p<
  </body>
