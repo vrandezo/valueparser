@@ -1,9 +1,9 @@
 display precision in meters (for Earth)
-do not display minutes when precision is "on the degree"
-do not display extra digits on decimal due to precision
+*do not display minutes when precision is "on the degree"
+*do not display extra digits on decimal due to precision
 explicitly entered 00 minutes are ignored
 absolute precision
 do not allow precision beyond thousandth degree
 do not allow precision beyond 1e-9
 do not allow degrees beyond 90 resp 180
-catch syntax error exception
+*catch syntax error exception

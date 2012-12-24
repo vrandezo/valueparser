@@ -778,22 +778,32 @@ var peggeoparser = (function(){
   return result;
 })();
 
-geoparser.parse = function( text ) {
+geoparser.parse = function( text, accuracy ) {
 	var data = {};
 	data.input = text;
-	var result = peggeoparser.parse(data.input);
+	var result = {};
+	try {
+		result = peggeoparser.parse(data.input);
+	} catch (err) {
+		result = [0, 0, 0];
+		data.error = err.toString();
+	}
 
 	data.latitude = { 'internal' : result[0]  };
 	data.longitude = { 'internal' : result[1] };
-	data.accuracy = { 'internal' : result[2] };
+	if (accuracy == undefined) {
+		data.accuracy = { 'internal' : result[2] };
+	} else {
+		data.accuracy = accuracy;
+	}
 
 	data.latitude.direction = (data.latitude.internal < 0) ? geoparser.settings.south : geoparser.settings.north;
 	data.latitude = geoparser.toDegree(data.latitude, data.accuracy.internal);
-	data.latitude.decimaltext = Math.abs(data.latitude.internal) + geoparser.settings.degree + ' ' + data.latitude.direction;
+	data.latitude = geoparser.toDecimal(data.latitude, data.accuracy.internal);
 
 	data.longitude.direction = (data.longitude.internal < 0) ? geoparser.settings.west : geoparser.settings.east;
 	data.longitude = geoparser.toDegree(data.longitude, data.accuracy.internal);
-	data.longitude.decimaltext = Math.abs(data.longitude.internal) + geoparser.settings.degree + ' ' + data.longitude.direction;
+	data.longitude = geoparser.toDecimal(data.longitude, data.accuracy.internal);
 
 	data.degreetext = data.latitude.degreetext + geoparser.settings.latlongcombinator + data.longitude.degreetext;
 	data.decimaltext = data.latitude.decimaltext + geoparser.settings.latlongcombinator + data.longitude.decimaltext;
@@ -820,6 +830,14 @@ geoparser.accuracyText = function( acc ) {
 		text = '&plusmn;' + acc + geoparser.settings.degree;
 	}
 	return text;
+};
+
+geoparser.toDecimal = function(value, accuracy) {
+	var val = Math.abs(value.internal);
+	var logacc = Math.floor(Math.log(accuracy) / Math.LN10);
+	value.decimal = Math.round(val*Math.pow(10, -1 * logacc))/Math.pow(10, -1 * logacc);
+	value.decimaltext = value.decimal + geoparser.settings.degree + ' ' + value.direction;
+	return value;
 };
 
 geoparser.toDegree = function(value, accuracy) {
