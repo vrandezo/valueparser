@@ -794,7 +794,7 @@ geoparser.parse = function( text, accuracy ) {
 	if (accuracy == undefined) {
 		data.accuracy = { 'internal' : result[2] };
 	} else {
-		data.accuracy = accuracy;
+		data.accuracy = { 'internal' : accuracy };
 	}
 
 	data.latitude.direction = (data.latitude.internal < 0) ? geoparser.settings.south : geoparser.settings.north;
@@ -808,6 +808,7 @@ geoparser.parse = function( text, accuracy ) {
 	data.degreetext = data.latitude.degreetext + geoparser.settings.latlongcombinator + data.longitude.degreetext;
 	data.decimaltext = data.latitude.decimaltext + geoparser.settings.latlongcombinator + data.longitude.decimaltext;
 	data.accuracy.text = geoparser.accuracyText( data.accuracy.internal );
+	data.accuracy.earthdistance = geoparser.accuracyOnEarthInMetric( data.accuracy.internal );
 
 	return data;
 };
@@ -825,6 +826,8 @@ geoparser.accuracyText = function( acc ) {
 		text = 'to the hundredth of a second';
 	} else if (Math.abs(acc-1/3600000) < 0.0000001) {
 		text = 'to the thousandth of a second';
+	} else if (acc == 0) {
+		text = 'exact';
 	} else {
 		if (acc < 9e-10) acc = 1e-9;
 		text = '&plusmn;' + acc + geoparser.settings.degree;
@@ -832,9 +835,27 @@ geoparser.accuracyText = function( acc ) {
 	return text;
 };
 
+geoparser.accuracyOnEarthInMetric = function( acc ) {
+	var km = 40000 / 360 * acc;
+	if (km > 100) return Math.round(km/100)*100 + " km";
+	if (km > 10) return Math.round(km/10)*10 + " km";
+	if (km > 1) return Math.round(km) + " km";
+	var m = km * 1000;
+	if (m > 100) return Math.round(m/100)*100 + " m";
+	if (m > 10) return Math.round(m/10)*10 + " m";
+	if (m > 1) return Math.round(m) + " m";
+	var cm = m * 100;
+	if (cm > 10) return Math.round(cm/10)*10 + " cm";
+	if (cm > 1) return Math.round(cm) + " cm";
+	var mm = cm * 10;
+	if (mm > 1) return Math.round(mm) + " mm";
+	return "1 mm";
+}
+
 geoparser.toDecimal = function(value, accuracy) {
 	var val = Math.abs(value.internal);
 	var logacc = Math.floor(Math.log(accuracy) / Math.LN10);
+	if (logacc < -9) logacc = -9;
 	value.decimal = Math.round(val*Math.pow(10, -1 * logacc))/Math.pow(10, -1 * logacc);
 	value.decimaltext = value.decimal + geoparser.settings.degree + ' ' + value.direction;
 	return value;
@@ -863,6 +884,26 @@ geoparser.toDegree = function(value, accuracy) {
 		+ text(value.second, geoparser.settings.second)
 		+ ' ' + value.direction;
 	return value;
+};
+
+var accuracylevels = [10, 1, 0.1, 1/60, 0.01, 1/3600, 0.001, 1/36000, 0.0001, 1/360000, 0.00001, 1/3600000, 0.000001];
+
+geoparser.increaseAccuracy = function(accuracy) {
+	var index = accuracylevels.indexOf(accuracy);
+	if ((index == accuracylevels.length-1) || (index < 0)) {
+		var retval = accuracy/10;
+		if (retval < 1e-9) return 0;
+		return retval;
+	}
+	return accuracylevels[index+1];
+};
+
+geoparser.decreaseAccuracy = function(accuracy) {
+	if (accuracy == 0) return 1e-9;
+	var index = accuracylevels.indexOf(accuracy);
+	if (index == 0) return 180;
+	if (index < 0) return Math.min(accuracy*10, 180);
+	return accuracylevels[index-1];
 };
 
 })(window);

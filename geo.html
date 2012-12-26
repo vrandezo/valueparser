@@ -10,9 +10,14 @@
   <script type="text/javascript">                                         
 result = {};
 $(document).ready(function() {
+	var accuracy = undefined;
+	var accuracyreturned = 1.0;
+	
 	var update = function() {
-		result = geoparser.parse($('#in').val());
+		result = geoparser.parse($('#in').val(), accuracy);
 		$('#acc').html(result.accuracy.text);
+		$('#accm').html(result.accuracy.earthdistance);
+		accuracyreturned = result.accuracy.internal;
 		
 		$('#dec').html(result.decimaltext);
 		$('#deg').html(result.degreetext);
@@ -21,6 +26,19 @@ $(document).ready(function() {
 
 		$('#all').text(JSON.stringify(result, null, 2));
 	}
+	
+	$('#accauto').bind('click', function() {
+		accuracy = undefined;
+		update();
+	});
+	$('#accinc').bind('click', function() {
+		accuracy = geoparser.increaseAccuracy(accuracyreturned);
+		update();
+	});
+	$('#accdec').bind('click', function() {
+		accuracy = geoparser.decreaseAccuracy(accuracyreturned);
+		update();
+	});
 
 	$('#in').bind('input', update);
 	
@@ -83,7 +101,12 @@ $(document).ready(function() {
      <br>
      <span id="dec">0°N, 0°E</span>
      <br>
-     Accuracy: <span id="acc">to the degree</span>
+     Accuracy: <span id="acc">to the degree</span>/<span id="accm">...</span>
+     <span style="font-size:60%">
+      <span id="accinc">[increase]</span>
+      <span id="accdec">[decrease]</span>
+      <span id="accauto">[auto]</span>
+     </span>
     </form>
     <div id="map" class="smallmap"></div>
     <p>The code is available on <a href="https://github.com/vrandezo/valueparser">Github</a>.</p<
