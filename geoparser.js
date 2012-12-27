@@ -19,6 +19,14 @@ geoparser.settings.latlongcombinator = ', ';
 geoparser.settings.degree = '°';
 geoparser.settings.minute = '\'';
 geoparser.settings.second = '"';
+geoparser.settings.accuracytexts = {};
+geoparser.settings.accuracytexts.degree = 'to a degree';
+geoparser.settings.accuracytexts.minute = 'to a minute';
+geoparser.settings.accuracytexts.second = 'to a second';
+geoparser.settings.accuracytexts.decisecond = 'to a tenth of a second';
+geoparser.settings.accuracytexts.centisecond = 'to the hundredth of a second';
+geoparser.settings.accuracytexts.milisecond = 'to the thousandth of a second';
+geoparser.settings.accuracytexts.maximal = 'maximal';
 
 var peggeoparser = (function(){
   /*
@@ -172,7 +180,7 @@ var peggeoparser = (function(){
               }
             }
             if (result2 !== null) {
-              if (input.substr(pos, 1).toLowerCase() === "n") {
+              if (input.substr(pos, 1).toUpperCase() === geoparser.settings.north) {
                 result3 = input.substr(pos, 1);
                 pos++;
               } else {
@@ -183,7 +191,7 @@ var peggeoparser = (function(){
               }
               result3 = result3 !== null ? result3 : "";
               if (result3 !== null) {
-                if (input.substr(pos, 1).toLowerCase() === "s") {
+                if (input.substr(pos, 1).toUpperCase() === geoparser.settings.south) {
                   result4 = input.substr(pos, 1);
                   pos++;
                 } else {
@@ -242,7 +250,7 @@ var peggeoparser = (function(){
                         }
                       }
                       if (result7 !== null) {
-                        if (input.substr(pos, 1).toLowerCase() === "e") {
+                        if (input.substr(pos, 1).toUpperCase() === geoparser.settings.east) {
                           result8 = input.substr(pos, 1);
                           pos++;
                         } else {
@@ -253,7 +261,7 @@ var peggeoparser = (function(){
                         }
                         result8 = result8 !== null ? result8 : "";
                         if (result8 !== null) {
-                          if (input.substr(pos, 1).toLowerCase() === "w") {
+                          if (input.substr(pos, 1).toUpperCase() === geoparser.settings.west) {
                             result9 = input.substr(pos, 1);
                             pos++;
                           } else {
@@ -815,19 +823,19 @@ geoparser.parse = function( text, accuracy ) {
 
 geoparser.accuracyText = function( acc ) {
 	if (Math.abs(acc-1) < 0.0000001) {
-		text = 'to the degree';
+		text = geoparser.settings.accuracytexts.degree;
 	} else if (Math.abs(acc-1/60) < 0.0000001) {
-		text = 'to the minute';
+		text = geoparser.settings.accuracytexts.minute;
 	} else if (Math.abs(acc-1/3600) < 0.0000001) {
-		text = 'to the second';
+		text = geoparser.settings.accuracytexts.second;
 	} else if (Math.abs(acc-1/36000) < 0.0000001) {
-		text = 'to the tenth of a second';
+		text = geoparser.settings.accuracytexts.decisecond;
 	} else if (Math.abs(acc-1/360000) < 0.0000001) {
-		text = 'to the hundredth of a second';
+		text = geoparser.settings.accuracytexts.centisecond;
 	} else if (Math.abs(acc-1/3600000) < 0.0000001) {
-		text = 'to the thousandth of a second';
+		text = geoparser.settings.accuracytexts.milisecond;
 	} else if (acc == 0) {
-		text = 'exact';
+		text = geoparser.settings.accuracytexts.maximal;
 	} else {
 		if (acc < 9e-10) acc = 1e-9;
 		text = '&plusmn;' + acc + geoparser.settings.degree;
