@@ -19,14 +19,14 @@ geoparser.settings.latlongcombinator = ', ';
 geoparser.settings.degree = '°';
 geoparser.settings.minute = '\'';
 geoparser.settings.second = '"';
-geoparser.settings.accuracytexts = {};
-geoparser.settings.accuracytexts.degree = 'to a degree';
-geoparser.settings.accuracytexts.minute = 'to a minute';
-geoparser.settings.accuracytexts.second = 'to a second';
-geoparser.settings.accuracytexts.decisecond = 'to a tenth of a second';
-geoparser.settings.accuracytexts.centisecond = 'to the hundredth of a second';
-geoparser.settings.accuracytexts.milisecond = 'to the thousandth of a second';
-geoparser.settings.accuracytexts.maximal = 'maximal';
+geoparser.settings.precisiontexts = {};
+geoparser.settings.precisiontexts.degree = 'to a degree';
+geoparser.settings.precisiontexts.minute = 'to a minute';
+geoparser.settings.precisiontexts.second = 'to a second';
+geoparser.settings.precisiontexts.decisecond = 'to a tenth of a second';
+geoparser.settings.precisiontexts.centisecond = 'to the hundredth of a second';
+geoparser.settings.precisiontexts.milisecond = 'to the thousandth of a second';
+geoparser.settings.precisiontexts.maximal = 'maximal';
 
 var peggeoparser = (function(){
   /*
@@ -786,7 +786,7 @@ var peggeoparser = (function(){
   return result;
 })();
 
-geoparser.parse = function( text, accuracy ) {
+geoparser.parse = function( text, precision ) {
 	var data = {};
 	data.input = text;
 	var result = {};
@@ -799,43 +799,43 @@ geoparser.parse = function( text, accuracy ) {
 
 	data.latitude = { 'internal' : result[0]  };
 	data.longitude = { 'internal' : result[1] };
-	if (accuracy == undefined) {
-		data.accuracy = { 'internal' : result[2] };
+	if (precision == undefined) {
+		data.precision = { 'internal' : result[2] };
 	} else {
-		data.accuracy = { 'internal' : accuracy };
+		data.precision = { 'internal' : precision };
 	}
 
 	data.latitude.direction = (data.latitude.internal < 0) ? geoparser.settings.south : geoparser.settings.north;
-	data.latitude = geoparser.toDegree(data.latitude, data.accuracy.internal);
-	data.latitude = geoparser.toDecimal(data.latitude, data.accuracy.internal);
+	data.latitude = geoparser.toDegree(data.latitude, data.precision.internal);
+	data.latitude = geoparser.toDecimal(data.latitude, data.precision.internal);
 
 	data.longitude.direction = (data.longitude.internal < 0) ? geoparser.settings.west : geoparser.settings.east;
-	data.longitude = geoparser.toDegree(data.longitude, data.accuracy.internal);
-	data.longitude = geoparser.toDecimal(data.longitude, data.accuracy.internal);
+	data.longitude = geoparser.toDegree(data.longitude, data.precision.internal);
+	data.longitude = geoparser.toDecimal(data.longitude, data.precision.internal);
 
 	data.degreetext = data.latitude.degreetext + geoparser.settings.latlongcombinator + data.longitude.degreetext;
 	data.decimaltext = data.latitude.decimaltext + geoparser.settings.latlongcombinator + data.longitude.decimaltext;
-	data.accuracy.text = geoparser.accuracyText( data.accuracy.internal );
-	data.accuracy.earthdistance = geoparser.accuracyOnEarthInMetric( data.accuracy.internal );
+	data.precision.text = geoparser.precisionText( data.precision.internal );
+	data.precision.earthdistance = geoparser.precisionOnEarthInMetric( data.precision.internal );
 
 	return data;
 };
 
-geoparser.accuracyText = function( acc ) {
+geoparser.precisionText = function( acc ) {
 	if (Math.abs(acc-1) < 0.0000001) {
-		text = geoparser.settings.accuracytexts.degree;
+		text = geoparser.settings.precisiontexts.degree;
 	} else if (Math.abs(acc-1/60) < 0.0000001) {
-		text = geoparser.settings.accuracytexts.minute;
+		text = geoparser.settings.precisiontexts.minute;
 	} else if (Math.abs(acc-1/3600) < 0.0000001) {
-		text = geoparser.settings.accuracytexts.second;
+		text = geoparser.settings.precisiontexts.second;
 	} else if (Math.abs(acc-1/36000) < 0.0000001) {
-		text = geoparser.settings.accuracytexts.decisecond;
+		text = geoparser.settings.precisiontexts.decisecond;
 	} else if (Math.abs(acc-1/360000) < 0.0000001) {
-		text = geoparser.settings.accuracytexts.centisecond;
+		text = geoparser.settings.precisiontexts.centisecond;
 	} else if (Math.abs(acc-1/3600000) < 0.0000001) {
-		text = geoparser.settings.accuracytexts.milisecond;
+		text = geoparser.settings.precisiontexts.milisecond;
 	} else if (acc == 0) {
-		text = geoparser.settings.accuracytexts.maximal;
+		text = geoparser.settings.precisiontexts.maximal;
 	} else {
 		if (acc < 9e-10) acc = 1e-9;
 		text = '&plusmn;' + acc + geoparser.settings.degree;
@@ -843,7 +843,7 @@ geoparser.accuracyText = function( acc ) {
 	return text;
 };
 
-geoparser.accuracyOnEarthInMetric = function( acc ) {
+geoparser.precisionOnEarthInMetric = function( acc ) {
 	var km = 40000 / 360 * acc;
 	if (km > 100) return Math.round(km/100)*100 + " km";
 	if (km > 10) return Math.round(km/10)*10 + " km";
@@ -860,10 +860,10 @@ geoparser.accuracyOnEarthInMetric = function( acc ) {
 	return "1 mm";
 }
 
-geoparser.toDecimal = function(value, accuracy) {
+geoparser.toDecimal = function(value, precision) {
 	if (typeof value === 'number') value = { 'internal' : value };
 	var val = Math.abs(value.internal);
-	var logacc = Math.floor(Math.log(accuracy) / Math.LN10);
+	var logacc = Math.floor(Math.log(precision) / Math.LN10);
 	if (logacc < -9) logacc = -9;
 	value.decimal = Math.round(val*Math.pow(10, -1 * logacc))/Math.pow(10, -1 * logacc);
 	var dir = value.direction ? ' ' + value.direction : '';
@@ -871,16 +871,16 @@ geoparser.toDecimal = function(value, accuracy) {
 	return value;
 };
 
-geoparser.toDegree = function(value, accuracy) {
+geoparser.toDegree = function(value, precision) {
 	if (typeof value === 'number') value = { 'internal' : value };
 	var val = Math.abs(value.internal);
 	value.degree = Math.floor(val+0.00000001);
-	if (accuracy > 0.9999999999) {
+	if (precision > 0.9999999999) {
 		value.minute = undefined;
 	} else {
 		value.minute = Math.floor((val-value.degree+0.000001)*60);
 	}
-	if (accuracy > (0.9999999999/60)) {
+	if (precision > (0.9999999999/60)) {
 		value.second = undefined;
 	} else {
 		value.second = (val-value.degree-value.minute/60)*3600;
@@ -898,24 +898,24 @@ geoparser.toDegree = function(value, accuracy) {
 	return value;
 };
 
-var accuracylevels = [10, 1, 0.1, 1/60, 0.01, 1/3600, 0.001, 1/36000, 0.0001, 1/360000, 0.00001, 1/3600000, 0.000001];
+var precisionlevels = [10, 1, 0.1, 1/60, 0.01, 1/3600, 0.001, 1/36000, 0.0001, 1/360000, 0.00001, 1/3600000, 0.000001];
 
-geoparser.increaseAccuracy = function(accuracy) {
-	var index = accuracylevels.indexOf(accuracy);
-	if ((index == accuracylevels.length-1) || (index < 0)) {
-		var retval = accuracy/10;
+geoparser.increasePrecision = function(precision) {
+	var index = precisionlevels.indexOf(precision);
+	if ((index == precisionlevels.length-1) || (index < 0)) {
+		var retval = precision/10;
 		if (retval < 1e-9) return 0;
 		return retval;
 	}
-	return accuracylevels[index+1];
+	return precisionlevels[index+1];
 };
 
-geoparser.decreaseAccuracy = function(accuracy) {
-	if (accuracy == 0) return 1e-9;
-	var index = accuracylevels.indexOf(accuracy);
+geoparser.decreasePrecision = function(precision) {
+	if (precision == 0) return 1e-9;
+	var index = precisionlevels.indexOf(precision);
 	if (index == 0) return 180;
-	if (index < 0) return Math.min(accuracy*10, 180);
-	return accuracylevels[index-1];
+	if (index < 0) return Math.min(precision*10, 180);
+	return precisionlevels[index-1];
 };
 
 })(window);

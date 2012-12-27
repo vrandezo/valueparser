@@ -10,14 +10,14 @@
   <script type="text/javascript">                                         
 result = {};
 $(document).ready(function() {
-	var accuracy = undefined;
-	var accuracyreturned = 1.0;
+	var precision = undefined;
+	var precisionreturned = 1.0;
 	
 	var update = function() {
-		result = geoparser.parse($('#in').val(), accuracy);
-		$('#acc').html(result.accuracy.text);
-		$('#accm').html(result.accuracy.earthdistance);
-		accuracyreturned = result.accuracy.internal;
+		result = geoparser.parse($('#in').val(), precision);
+		$('#prec').html(result.precision.text);
+		$('#precm').html(result.precision.earthdistance);
+		precisionreturned = result.precision.internal;
 		
 		$('#dec').html(result.decimaltext);
 		$('#deg').html(result.degreetext);
@@ -28,22 +28,22 @@ $(document).ready(function() {
 		var safe = {
 			'latitude' : result.latitude.internal,
 			'longitude' : result.longitude.internal,
-			'accuracy' : result.accuracy.internal,
+			'precision' : result.precision.internal,
 			'globe' : 'http://wikidata.org/id/Q2'
 		}
 		$('#save').text(JSON.stringify(safe, null, 2));
 	}
 	
-	$('#accauto').bind('click', function() {
-		accuracy = undefined;
+	$('#precauto').bind('click', function() {
+		precision = undefined;
 		update();
 	});
-	$('#accinc').bind('click', function() {
-		accuracy = geoparser.increaseAccuracy(accuracyreturned);
+	$('#precinc').bind('click', function() {
+		precision = geoparser.increasePrecision(precisionreturned);
 		update();
 	});
-	$('#accdec').bind('click', function() {
-		accuracy = geoparser.decreaseAccuracy(accuracyreturned);
+	$('#precdec').bind('click', function() {
+		precision = geoparser.decreasePrecision(precisionreturned);
 		update();
 	});
 
@@ -108,7 +108,7 @@ $(document).ready(function() {
   <div class="left">
    <h1>Geolocation</h1>
     <p>
-     Enter here a geolocation (only WGS84 datums are accepted):
+     Enter here a geolocation (assuming WGS84 datums):
     <form>
      <input type="text" id="in" class="in" name="in" autofocus placeholder="Test your value here" style="font-size:200%" />
      <br>
@@ -116,11 +116,11 @@ $(document).ready(function() {
      <br>
      <span id="dec">0°N, 0°E</span>
      <br>
-     Accuracy: <span id="acc">to the degree</span>/<span id="accm">...</span>
+     Precision: <span id="prec">to the degree</span>/<span id="precm">...</span>
      <span style="font-size:60%">
-      <span id="accinc">[increase]</span>
-      <span id="accdec">[decrease]</span>
-      <span id="accauto">[auto]</span>
+      <span id="precinc">[increase]</span>
+      <span id="preccdec">[decrease]</span>
+      <span id="precauto">[auto]</span>
      </span>
     </form>
     <div id="map" class="smallmap"></div><div id="x">x</div>
