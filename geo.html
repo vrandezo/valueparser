@@ -2,7 +2,7 @@
 <html>
  <head>
   <meta charset="utf-8">
-  <title>Value parser demo: Geolocation</title>
+  <title>Value parser: Geolocation</title>
   <script type="text/javascript" src="jquery-1.8.1.min.js"></script>          
   <script type="text/javascript" src="json2.js"></script>        
   <script type="text/javascript" src="geoparser.js"></script>
@@ -106,10 +106,9 @@ $(document).ready(function() {
    <pre id="save">{}</pre>
   </div>
   <div class="left">
-   <h1>Geo location</h1>
+   <h1>Geolocation</h1>
     <p>
-     Enter here a geo location.
-    </p>
+     Enter here a geolocation (only WGS84 datums are accepted):
     <form>
      <input type="text" id="in" class="in" name="in" autofocus placeholder="Test your value here" style="font-size:200%" />
      <br>
@@ -126,6 +125,7 @@ $(document).ready(function() {
     </form>
     <div id="map" class="smallmap"></div><div id="x">x</div>
     <p>The code is available on <a href="https://github.com/vrandezo/valueparser">Github</a>.</p<
+    </p>
   </div>
  </body>
 </html>
