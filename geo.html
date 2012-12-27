@@ -63,6 +63,32 @@ $(document).ready(function() {
     	{'attribution': 'Map data by <a href="http://openstreetmap.org">OpenStreetMap</a>'} );
     map.addLayer(layer);
     center(0, 0, 2);
+
+    OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {                
+    	defaultHandlerOptions: {
+			'single': true,
+			'double': false,
+			'pixelTolerance': 0,
+			'stopSingle': false,
+			'stopDouble': false
+		},
+		initialize: function(options) {
+			this.handlerOptions = OpenLayers.Util.extend({}, this.defaultHandlerOptions);
+			OpenLayers.Control.prototype.initialize.apply( this, arguments ); 
+			this.handler = new OpenLayers.Handler.Click( this, { 'click': this.trigger }, this.handlerOptions );
+        }, 
+		trigger: function(e) {
+        	var lonlat = map.getLonLatFromPixel(e.xy);
+        	lonlat.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
+			var p = (precision == undefined) ? 1/36 : precision;
+			var result = geoparser.parse(lonlat.lat + ' ' + lonlat.lon, p);
+			$('#in').val(result.degreetext);
+			update();
+        }
+	});
+    var click = new OpenLayers.Control.Click();
+	map.addControl(click);
+    click.activate();
 });
   </script>
   <style>
@@ -95,6 +121,7 @@ $(document).ready(function() {
 		bottom: 214px;
 		z-index: 1000;
 		left: 297px;
+		pointer-events:none;
 	}
   </style>
  </head>
@@ -120,7 +147,7 @@ $(document).ready(function() {
      Precision: <span id="prec">to the degree</span>/<span id="precm">...</span>
      <span style="font-size:60%">
       <span id="precinc">[increase]</span>
-      <span id="preccdec">[decrease]</span>
+      <span id="precdec">[decrease]</span>
       <span id="precauto">[auto]</span>
      </span>
     </form>

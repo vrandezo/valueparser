@@ -21,11 +21,11 @@ geoparser.settings.minute = '\'';
 geoparser.settings.second = '"';
 geoparser.settings.precisiontexts = {};
 geoparser.settings.precisiontexts.degree = 'to a degree';
-geoparser.settings.precisiontexts.minute = 'to a minute';
-geoparser.settings.precisiontexts.second = 'to a second';
-geoparser.settings.precisiontexts.decisecond = 'to a tenth of a second';
-geoparser.settings.precisiontexts.centisecond = 'to the hundredth of a second';
-geoparser.settings.precisiontexts.milisecond = 'to the thousandth of a second';
+geoparser.settings.precisiontexts.minute = 'to an arcminute';
+geoparser.settings.precisiontexts.second = 'to am arcsecond';
+geoparser.settings.precisiontexts.decisecond = 'to a tenth of an arcsecond';
+geoparser.settings.precisiontexts.centisecond = 'to the hundredth of an arcsecond';
+geoparser.settings.precisiontexts.milisecond = 'to the thousandth of an arcsecond';
 geoparser.settings.precisiontexts.maximal = 'maximal';
 
 var peggeoparser = (function(){
@@ -804,7 +804,7 @@ geoparser.parse = function( text, precision ) {
 	} else {
 		data.precision = { 'internal' : precision };
 	}
-
+	
 	data.latitude.direction = (data.latitude.internal < 0) ? geoparser.settings.south : geoparser.settings.north;
 	data.latitude = geoparser.toDegree(data.latitude, data.precision.internal);
 	data.latitude = geoparser.toDecimal(data.latitude, data.precision.internal);
