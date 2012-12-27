@@ -884,7 +884,14 @@ geoparser.toDegree = function(value, precision) {
 		value.second = undefined;
 	} else {
 		value.second = (val-value.degree-value.minute/60)*3600;
-		value.second = Math.round(value.second*1000)/1000
+		if (precision > (0.9999999999/3600))
+			value.second = Math.round(value.second);
+		else if (precision > (0.9999999999/36000))
+			value.second = Math.round(value.second*10)/10;
+		else if (precision > (0.9999999999/360000))
+			value.second = Math.round(value.second*100)/100;
+		else
+			value.second = Math.round(value.second*1000)/1000;
 	}
 	var text = function(number, sign) {
 		if (number == undefined) return '';

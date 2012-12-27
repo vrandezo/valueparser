@@ -80,8 +80,9 @@ $(document).ready(function() {
 		trigger: function(e) {
         	var lonlat = map.getLonLatFromPixel(e.xy);
         	lonlat.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
-        	if (precision == undefined ) precision = 1/60;
-			var result = geoparser.parse(lonlat.lat + ' ' + lonlat.lon, precision);
+        	var p = precision;
+        	if (p == undefined ) p = 1/60;
+			var result = geoparser.parse(lonlat.lat + ' ' + lonlat.lon, p);
 			$('#in').val(result.degreetext);
 			update();
         }
