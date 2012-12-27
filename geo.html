@@ -25,6 +25,13 @@ $(document).ready(function() {
 		center(result.latitude.internal, result.longitude.internal);
 
 		$('#all').text(JSON.stringify(result, null, 2));
+		var safe = {
+			'latitude' : result.latitude.internal,
+			'longitude' : result.longitude.internal,
+			'accuracy' : result.accuracy.internal,
+			'globe' : 'http://wikidata.org/id/Q2'
+		}
+		$('#save').text(JSON.stringify(safe, null, 2));
 	}
 	
 	$('#accauto').bind('click', function() {
@@ -88,6 +95,9 @@ $(document).ready(function() {
   <div class="right">
    <pre id="all">For the JSON structure see also in your
    JS console the variable &quot;result&quot;</pre>
+   <br>
+   Send to the backend to be saved:
+   <pre id="save">{}</pre>
   </div>
   <div class="left">
    <h1>Geo location</h1>
