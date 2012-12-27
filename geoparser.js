@@ -853,15 +853,18 @@ geoparser.accuracyOnEarthInMetric = function( acc ) {
 }
 
 geoparser.toDecimal = function(value, accuracy) {
+	if (typeof value === 'number') value = { 'internal' : value };
 	var val = Math.abs(value.internal);
 	var logacc = Math.floor(Math.log(accuracy) / Math.LN10);
 	if (logacc < -9) logacc = -9;
 	value.decimal = Math.round(val*Math.pow(10, -1 * logacc))/Math.pow(10, -1 * logacc);
-	value.decimaltext = value.decimal + geoparser.settings.degree + ' ' + value.direction;
+	var dir = value.direction ? ' ' + value.direction : '';
+	value.decimaltext = value.decimal + geoparser.settings.degree + dir;
 	return value;
 };
 
 geoparser.toDegree = function(value, accuracy) {
+	if (typeof value === 'number') value = { 'internal' : value };
 	var val = Math.abs(value.internal);
 	value.degree = Math.floor(val+0.00000001);
 	if (accuracy > 0.9999999999) {
@@ -879,10 +882,11 @@ geoparser.toDegree = function(value, accuracy) {
 		if (number == undefined) return '';
 		else return number + sign;
 	}
+	var dir = value.direction ? ' ' + value.direction : '';
 	value.degreetext = text(value.degree, geoparser.settings.degree)
 		+ text(value.minute, geoparser.settings.minute)
 		+ text(value.second, geoparser.settings.second)
-		+ ' ' + value.direction;
+		+ dir;
 	return value;
 };
 
