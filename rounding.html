@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+ <head>
+  <meta charset="utf-8">
+  <title>Rounding test</title>
+  <style>
+	body {
+    	background: #fff;
+	    font: 100.01% "Fontin Sans", Fontin-Sans, "Myriad Pro", "Lucida Grande", "Lucida Sans Unicode", Lucida, Verdana, Helvetica, sans-serif;
+    	color: #000;
+	    margin: 20px 20px 40px 40px;
+    	padding: 0;
+	    text-align: left;
+	}
+  </style>
+ </head>
+ <body>
+  <h1>Rounding</h1>
+   <p>
+  <script type="text/javascript">                                         
+	var f = 0.0;
+	var min = 0;
+	var sec = 0.0;
+	
+	for (var i = 0; i < 3600; i++) {
+		var x = min/60.0 + sec/3600.0;
+		
+		xm = Math.floor(x*60.0);
+		if (min!=xm) { document.write(xm + ' ' + min + '<br>'); }
+		xs = (x-min/60.0)*3600.0;
+		if (sec.toFixed(9)!=xs.toFixed(9)) { document.write(min + "'" + xs + ' ' + sec + '<br>'); }
+		sec += 0.001;
+		if (sec > 59.9999999) { sec = 0.0; min = min + 1.0; }
+	}
+  </script>
+   </p>
+ </body>
+</html>
