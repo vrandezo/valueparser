@@ -59,9 +59,10 @@ $(document).ready(function() {
 	};
 	
     var map = new OpenLayers.Map('map');
-    var layer = new OpenLayers.Layer.OSM( "Simple OSM Map" );
+    var layer = new OpenLayers.Layer.OSM( 'Simple OSM Map', undefined,
+    	{'attribution': 'Map data by <a href="http://openstreetmap.org">OpenStreetMap</a>'} );
     map.addLayer(layer);
-    center(0,0, 2);
+    center(0, 0, 2);
 });
   </script>
   <style>
