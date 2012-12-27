@@ -10,14 +10,14 @@
   <script type="text/javascript">                                         
 result = {};
 $(document).ready(function() {
-	var uncertainty = undefined;
-	var uncertaintyreturned = 1.0;
+	var accuracy = undefined;
+	var accuracyreturned = 1.0;
 	
 	var update = function() {
-		result = geoparser.parse($('#in').val(), uncertainty);
-		$('#acc').html(result.uncertainty.text);
-		$('#accm').html(result.uncertainty.earthdistance);
-		uncertaintyreturned = result.uncertainty.internal;
+		result = geoparser.parse($('#in').val(), accuracy);
+		$('#acc').html(result.accuracy.text);
+		$('#accm').html(result.accuracy.earthdistance);
+		accuracyreturned = result.accuracy.internal;
 		
 		$('#dec').html(result.decimaltext);
 		$('#deg').html(result.degreetext);
@@ -28,22 +28,22 @@ $(document).ready(function() {
 		var safe = {
 			'latitude' : result.latitude.internal,
 			'longitude' : result.longitude.internal,
-			'uncertainty' : result.uncertainty.internal,
+			'accuracy' : result.accuracy.internal,
 			'globe' : 'http://wikidata.org/id/Q2'
 		}
 		$('#save').text(JSON.stringify(safe, null, 2));
 	}
 	
 	$('#accauto').bind('click', function() {
-		uncertainty = undefined;
+		accuracy = undefined;
 		update();
 	});
 	$('#accinc').bind('click', function() {
-		uncertainty = geoparser.decreaseUncertainty(uncertaintyreturned);
+		accuracy = geoparser.increaseAccuracy(accuracyreturned);
 		update();
 	});
 	$('#accdec').bind('click', function() {
-		uncertainty = geoparser.increaseUncertainty(uncertaintyreturned);
+		accuracy = geoparser.decreaseAccuracy(accuracyreturned);
 		update();
 	});
 
