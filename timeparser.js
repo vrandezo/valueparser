@@ -61,7 +61,7 @@ timeparser.maxPrecision =  14;
 
 var pad = function(number,digits) { return (1e12 + Math.abs(number) + '').slice(-digits); }
 
-timeparser.parse = function( text, precision ) {
+var parse = function( text, precision ) {
 	var data = {};
 	data.input = text;
 	
@@ -80,7 +80,7 @@ timeparser.parse = function( text, precision ) {
 		data.precision.internal = precision;
 	}
 
-	data.precision.text = timeparser.precisionText( data.precision.internal );
+	data.precision.text = precisionText( data.precision.internal );
 	data.precision.before = 0;
 	data.precision.after = 0;
 	
@@ -92,7 +92,7 @@ timeparser.parse = function( text, precision ) {
 		data.gday = data.day;
 		data.calendar = 'http://wikidata.org/id/Q12138';
 	} else if (data.calendarname === 'Julian') {
-		var result = timeparser.julianToGregorian(data.year, data.month, data.day);
+		var result = julianToGregorian(data.year, data.month, data.day);
 		data.gyear = result.year;
 		data.gmonth = result.month;
 		data.gday = result.day;
@@ -114,16 +114,18 @@ timeparser.parse = function( text, precision ) {
 	
 	return data;
 };
+timeparser.parse = parse;
 
-timeparser.julianToJulianDay = function(year, month, day) {
+var julianToJulianDay = function(year, month, day) {
 	// based on en.wikipedia.org/wiki/Julian_day_number
 	var a = Math.floor((14-month)/12);
 	var y = year + 4800 - a;
 	var m = month + 12 * a - 3;
 	return day + Math.floor((153*m + 2)/5) + 365*y + Math.floor(y/4) - 32083;
 };
+timeparser.julianToJulianDay = julianToJulianDay;
 
-timeparser.julianDayToGregorian = function(jdn) {
+var julianDayToGregorian = function(jdn) {
 	// based on en.wikipedia.org/wiki/Julian_day_number
 	var result = {};
 	var j = jdn + 32044;
@@ -143,11 +145,13 @@ timeparser.julianDayToGregorian = function(jdn) {
 	result.day = d + 1;
 	return result;
 };
+timeparser.julianDayToGregorian = julianDayToGregorian;
 
-timeparser.julianToGregorian = function(year, month, day) {
-	var julianday = timeparser.julianToJulianDay(year, month, day);
-	return timeparser.julianDayToGregorian(julianday);
+var julianToGregorian = function(year, month, day) {
+	var julianday = julianToJulianDay(year, month, day);
+	return julianDayToGregorian(julianday);
 };
+timeparser.julianToGregorian = julianToGregorian;
 
 var readAsYear = function(word) {
 	var year = parseInt(word);
@@ -207,6 +211,23 @@ var readAsCalendar = function(word) {
 	return null;
 };
 
+var tokenize = function(s) {
+	var result = [];
+	var token = '';
+	for (var i = 0; i < s.length; i++) {
+		if (/\s/.test(s[i])) {
+			if (token === '') continue;
+			result.push(token);
+			token = '';
+			continue;
+		}
+		token += s[i];
+	}
+	if (token !== '') result.push(token);
+	return result;
+};
+timeparser.tokenize = tokenize;
+
 var getDateFromText = function(data) {
 	var year = null;
 	var month = null;
@@ -214,9 +235,7 @@ var getDateFromText = function(data) {
 	var bce = null;
 	var calendar = null;
 	
-	var splits = data.input.split(/[\s.,]+/);
-	var words = new Array();
-	for (var i = 0; i<splits.length; i++) if (splits[i]!=='') words.push(splits[i]);
+	var words = tokenize(data.input);
 	
 	if (words.length === 1) {
 		var year0 = readAsYear(words[0]);
@@ -389,8 +408,9 @@ var getTextFromDate = function(data) {
 	}
 };
 
-timeparser.precisionText = function( acc ) {
+var precisionText = function( acc ) {
 	if ((acc > timeparser.settings.maxPrecision) || (acc < 0)) return undefined;
 	return timeparser.settings.precisiontexts[acc];
 };
+timeparser.precisionText = precisionText;
 })(window);
