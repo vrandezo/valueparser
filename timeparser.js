@@ -12,10 +12,11 @@ timeparser.noConflict = function() {
 timeparser.settings = {};
 timeparser.settings.bce = ['BCE', 'BC'];
 timeparser.settings.ace = ['CE', 'AD'];
-timeparser.settings.ago = ['ago'];
+timeparser.settings.pasttext = '% ago';
+timeparser.settings.futuretext = 'in %';
 timeparser.settings.calendarnames = [];
-timeparser.settings.calendarnames[0] = ['Gregorian', 'GD', 'GC' 'NS']
-timeparser.settings.calendarnames[1] = ['Julian', 'JD', 'JC', 'OS']
+timeparser.settings.calendarnames[0] = ['Gregorian', 'G', 'GD', 'GC', 'NS']
+timeparser.settings.calendarnames[1] = ['Julian', 'J', 'JD', 'JC', 'OS']
 timeparser.settings.monthnames = [];
 timeparser.settings.monthnames[0]  = ['January', 'Jan'];
 timeparser.settings.monthnames[1]  = ['February', 'Feb'];
@@ -30,34 +31,33 @@ timeparser.settings.monthnames[9]  = ['October', 'Oct'];
 timeparser.settings.monthnames[10] = ['November', 'Nov'];
 timeparser.settings.monthnames[11] = ['December', 'Dec'];
 timeparser.settings.precisiontexts = {};
-timeparser.settings.precisiontexts[5]  = 'second';
-timeparser.settings.precisiontexts[4]  = 'minute';
-timeparser.settings.precisiontexts[3]  = 'hour';
-timeparser.settings.precisiontexts[2]  = 'day';
-timeparser.settings.precisiontexts[1]  = 'month';
-timeparser.settings.precisiontexts[0]  = 'year';
-timeparser.settings.precisiontexts[-1] = 'decade';
-timeparser.settings.precisiontexts[-2] = 'century';
-timeparser.settings.precisiontexts[-3] = 'millenium';
-timeparser.settings.precisiontexts[-4] = '10,000 years';
-timeparser.settings.precisiontexts[-5] = '100,000 years';
-timeparser.settings.precisiontexts[-6] = 'million years';
-timeparser.settings.precisiontexts[-7] = 'ten million years';
-timeparser.settings.precisiontexts[-8] = 'hundred million years';
-timeparser.settings.precisiontexts[-9] = 'billion years';
+timeparser.settings.precisiontexts[0]  = 'billion years';
+timeparser.settings.precisiontexts[1]  = 'hundred million years';
+timeparser.settings.precisiontexts[2]  = 'ten million years';
+timeparser.settings.precisiontexts[3]  = 'million years';
+timeparser.settings.precisiontexts[4]  = '100,000 years';
+timeparser.settings.precisiontexts[5]  = '10,000 years';
+timeparser.settings.precisiontexts[6]  = 'millenium';
+timeparser.settings.precisiontexts[7]  = 'century';
+timeparser.settings.precisiontexts[8]  = 'decade';
+timeparser.settings.precisiontexts[9]  = 'year';
+timeparser.settings.precisiontexts[10] = 'month';
+timeparser.settings.precisiontexts[11] = 'day';
+timeparser.settings.precisiontexts[12] = 'hour';
+timeparser.settings.precisiontexts[13] = 'minute';
+timeparser.settings.precisiontexts[14] = 'second';
 timeparser.settings.outputprecision = {};
-timeparser.settings.outputprecision[-1] = '%0s';
-timeparser.settings.outputprecision[-2] = '%. century';
-timeparser.settings.outputprecision[-3] = '%. millenium';
-timeparser.settings.outputprecision[-4] = '%0,000 years';
-timeparser.settings.outputprecision[-5] = '%00,000 years';
-timeparser.settings.outputprecision[-6] = '% million years';
-timeparser.settings.outputprecision[-7] = '%0 million years';
-timeparser.settings.outputprecision[-8] = '%00 million years';
-timeparser.settings.outputprecision[-9] = '% billion years';
+timeparser.settings.outputprecision[0] = '% billion years';
+timeparser.settings.outputprecision[1] = '%00 million years';
+timeparser.settings.outputprecision[2] = '%0 million years';
+timeparser.settings.outputprecision[3] = '% million years';
+timeparser.settings.outputprecision[4] = '%00,000 years';
+timeparser.settings.outputprecision[5] = '%0,000 years';
+timeparser.settings.outputprecision[6] = '%. millenium';
+timeparser.settings.outputprecision[7] = '%. century';
+timeparser.settings.outputprecision[8] = '%0s';
 
-timeparser.precisionMax =  5;
-timeparser.precisionMin = -9;
+timeparser.maxPrecision =  14;
 
 var pad = function(number,digits) { return (1e12 + Math.abs(number) + '').slice(-digits); }
 
@@ -72,10 +72,13 @@ timeparser.parse = function( text, precision ) {
 	data.hour = 0;
 	data.minute = 0;
 	data.second = 0;
+	data.precision = {};
 	
-	data.precision = { 'internal' : (precision === undefined) ? 0 : precision };
-
 	getDateFromText(data);
+
+	if (precision !== undefined) {
+		data.precision.internal = precision;
+	}
 
 	data.precision.text = timeparser.precisionText( data.precision.internal );
 	data.precision.before = 0;
@@ -318,15 +321,15 @@ var getDateFromText = function(data) {
 	if (year !== null) {
 		data.year = year;
 		if (year < 1) data.bce = true;
-		data.precision.internal = 0;
+		data.precision.internal = 9;
 	}
 	if (month !== null) {
 		data.month = month;
-		data.precision.internal = 1;
+		data.precision.internal = 10;
 	}
 	if (day !== null) {
 		data.day = day;
-		data.precision.internal = 2;
+		data.precision.internal = 11;
 	}
 	if (calendar !== null) {
 		data.calendarname = calendar;
@@ -335,6 +338,25 @@ var getDateFromText = function(data) {
 	} else {
 		data.calendarname = 'Gregorian';
 	}
+};
+
+var writeApproximateYear = function(data) {
+	var p = data.precision.internal;
+	var significant = Math.floor(Math.abs(data.year)/Math.pow(10, 9-p));
+	if (p<8) significant++;
+	var text = timeparser.settings.outputprecision[p].replace('%', significant);
+	if (p < 6) {
+		if (data.bce) {
+			text = timeparser.settings.pasttext.replace('%', text);
+		} else {
+			text = timeparser.settings.futuretext.replace('%', text);
+		}
+	} else {
+		if (data.bce) {
+			text += ' ' + timeparser.settings.bce[0];
+		}
+	}
+	return text;
 };
 
 var writeYear = function(data) {
@@ -358,16 +380,17 @@ var writeDay = function(data) {
 var getTextFromDate = function(data) {
 	var retval = '';
 	if (data.year === null) return '';
+	if (data.precision.internal < 9) return writeApproximateYear(data);
 	switch (data.precision.internal) {
-		case  0 : return writeYear(data);
-		case  1 : return writeMonth(data);
-		case  2 : return writeDay(data);
+		case  9 : return writeYear(data);
+		case 10 : return writeMonth(data);
+		case 11 : return writeDay(data);
 		default : return 'not understood';
 	}
 };
 
 timeparser.precisionText = function( acc ) {
-	if ((acc > 6) || (acc < -9)) return undefined;
+	if ((acc > timeparser.settings.maxPrecision) || (acc < 0)) return undefined;
 	return timeparser.settings.precisiontexts[acc];
 };
 })(window);

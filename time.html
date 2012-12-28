@@ -18,6 +18,14 @@ $(document).ready(function() {
 		precisionreturned = result.precision.internal;
 		
 		$('#out').html(result.text);
+		
+		if ((result.year > 1581) && (result.year < 1930) && (result.precision.internal > 10)) {
+			$('#calendar').html('(proleptic ' + result.calendarname + ' calendar)');
+			$('#calchange').show();
+		} else {
+			$('#calendar').html('');
+			$('#calchange').hide();
+		}
 
 		$('#all').text(JSON.stringify(result, null, 2));
 		var safe = {
@@ -36,16 +44,21 @@ $(document).ready(function() {
 		update();
 	});
 	$('#precinc').bind('click', function() {
-		if (precisionreturned==timeparser.precisionMax) return;
+		if (precisionreturned==timeparser.maxPrecision) return;
 		precision = precisionreturned+1;
 		update();
 	});
 	$('#precdec').bind('click', function() {
-		if (precisionreturned==timeparser.precisionMin) return;
+		if (precisionreturned==0) return;
 		precision = precisionreturned-1;
 		update();
 	});
+	$('#calchange').bind('click', function() {
+		$('#in').val( $('#out').text() + ' ' + ((result.calendarname === 'Julian')? 'G' : 'J'));
+		update();
+	});
 
+	$('#calchange').hide();
 	$('#in').bind('input', update);
 });
   </script>
@@ -68,6 +81,10 @@ $(document).ready(function() {
 	.right {
 		float : right;
 		width : 500px; 
+	}
+	.action {
+		font-size  : 60%;
+		color : blue;
 	}
   </style>
  </head>
@@ -94,14 +111,16 @@ $(document).ready(function() {
      <br>
 	     <span id="out" style="font-size:200%">...</span>
      <br>
+         <span id="calendar"> </span> 
+         <span id="calchange" class="action">[no, change it to the other one!]</span>
+     &nbsp;
+     <br>
      &nbsp;
      <br>
      Precision: <span id="prec">to the year</span>
-     <span style="font-size:60%">
-      <span id="precinc">[increase]</span>
-      <span id="precdec">[decrease]</span>
-      <span id="precauto">[auto]</span>
-     </span>
+     <span id="precinc" class="action">[increase]</span>
+     <span id="precdec" class="action">[decrease]</span>
+     <span id="precauto" class="action">[auto]</span>
     </form>
      <br>
      &nbsp;
