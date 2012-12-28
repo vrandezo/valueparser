@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+ <head>
+  <meta charset="utf-8">
+  <title>Value parser: Time</title>
+  <script type="text/javascript" src="jquery-1.8.1.min.js"></script>          
+  <script type="text/javascript" src="json2.js"></script>        
+  <script type="text/javascript" src="timeparser.js"></script>
+  <script type="text/javascript">                                         
+result = {};
+$(document).ready(function() {
+	var precision = undefined;
+	var precisionreturned = 1;
+	
+	var update = function() {
+		result = timeparser.parse($('#in').val(), precision);
+		$('#prec').html(result.precision.text);
+		precisionreturned = result.precision.internal;
+		
+		$('#out').html(result.text);
+
+		$('#all').text(JSON.stringify(result, null, 2));
+		var safe = {
+			'time' : result.time,
+			'precision' : result.precision.internal,
+			'before' : result.precision.before,
+			'after' : result.precision.after,
+			'utcoffset' : result.utcoffset,
+			'calendar' : result.calendar
+		}
+		$('#save').text(JSON.stringify(safe, null, 2));
+	}
+	
+	$('#precauto').bind('click', function() {
+		precision = undefined;
+		update();
+	});
+	$('#precinc').bind('click', function() {
+		if (precisionreturned==timeparser.precisionMax) return;
+		precision = precisionreturned+1;
+		update();
+	});
+	$('#precdec').bind('click', function() {
+		if (precisionreturned==timeparser.precisionMin) return;
+		precision = precisionreturned-1;
+		update();
+	});
+
+	$('#in').bind('input', update);
+});
+  </script>
+  <style>
+	body {
+    	background: #fff;
+	    font: 100.01% "Fontin Sans", Fontin-Sans, "Myriad Pro", "Lucida Grande", "Lucida Sans Unicode", Lucida, Verdana, Helvetica, sans-serif;
+    	color: #000;
+	    margin: 20px 20px 40px 40px;
+    	padding: 0;
+	    text-align: left;
+	}
+	.in {
+		width: 600px;
+	}
+	.left {
+		float : left;
+		width : 620px;
+	}
+	.right {
+		float : right;
+		width : 500px; 
+	}
+  </style>
+ </head>
+ <body>
+  <div class="right">
+   <pre id="all">For the JSON structure see also in your
+   JS console the variable &quot;result&quot;</pre>
+   <br>
+   Send to the backend to be saved:
+   <pre id="save">{}</pre>
+  </div>
+  <div class="left">
+   <h1>Time</h1>
+    <p>
+     Enter here a point in time:
+    <form>
+     <input type="text" id="in" class="in" name="in" autofocus placeholder="Test your value here" style="font-size:200%" />
+     <br>
+     &nbsp;
+     <br>
+     Understood and displayed as:
+     <br>
+     &nbsp;
+     <br>
+	     <span id="out" style="font-size:200%">...</span>
+     <br>
+     &nbsp;
+     <br>
+     Precision: <span id="prec">to the year</span>
+     <span style="font-size:60%">
+      <span id="precinc">[increase]</span>
+      <span id="precdec">[decrease]</span>
+      <span id="precauto">[auto]</span>
+     </span>
+    </form>
+     <br>
+     &nbsp;
+     <br>
+    <p>
+    The code is available on <a href="https://github.com/vrandezo/valueparser">Github</a>.</p<
+    </p>
+  </div>
+ </body>
+</html>
