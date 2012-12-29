@@ -10,13 +10,13 @@ timeparser.noConflict = function() {
 };
 
 timeparser.settings = {};
-timeparser.settings.bce = ['BCE', 'BC', 'B.C.'];
-timeparser.settings.ace = ['CE', 'AD', 'A.D.'];
+timeparser.settings.bce = ['BCE', 'BC', 'B.C.', 'before Common Era', 'before Christ'];
+timeparser.settings.ace = ['CE', 'AD', 'A.D.', 'Anno Domini', 'Common Era'];
 timeparser.settings.pasttext = '% ago';
 timeparser.settings.futuretext = 'in %';
 timeparser.settings.calendarnames = [];
-timeparser.settings.calendarnames[0] = ['Gregorian', 'G', 'GD', 'GC', 'NS', 'N.S.']
-timeparser.settings.calendarnames[1] = ['Julian', 'J', 'JD', 'JC', 'OS', 'G.S.']
+timeparser.settings.calendarnames[0] = ['Gregorian', 'G', 'GD', 'GC', 'NS', 'N.S.', 'New Style', 'Gregorian calendar', 'Gregorian date'];
+timeparser.settings.calendarnames[1] = ['Julian', 'J', 'JD', 'JC', 'OS', 'O.S.', 'Old Style', 'Julian calendar', 'Julian date'];
 timeparser.settings.monthnames = [];
 timeparser.settings.monthnames[0]  = ['January', 'Jan'];
 timeparser.settings.monthnames[1]  = ['February', 'Feb'];
@@ -96,12 +96,12 @@ var parse = function( text, precision ) {
 		data.gyear = result.year;
 		data.gmonth = result.month;
 		data.gday = result.day;
-		data.calendar = 'http://wikidata.org/id/Q11184';
+		data.calendar = 'http://wikidata.org/id/Q1985786';
 	} else {
 		data.gyear = null;
 		data.gmonth = null;
 		data.gday = null;
-		data.calendar = 'http://wikidata.org/id/Q12138';
+		data.calendar = 'http://wikidata.org/id/Q1985727';
 	}
 	
 	if (data.gyear !== null) {
@@ -211,158 +211,147 @@ var readAsCalendar = function(word) {
 	return null;
 };
 
+var testString = function(s) {
+	var v = readAsMonth(s);
+	if (v !== null) {
+		return { 'val' : v, 'type' : 'month', 'month' : true };
+	}
+	v = readAsBCE(s);
+	if (v !== null) {
+		return { 'val' : v, 'type' : 'bce' };
+	}
+	v = readAsCalendar(s);
+	if (v !== null) {
+		return { 'val' : v, 'type' : 'calendar' };
+	}
+	return null;
+};
+
+var fullMatch = function(str, reg) {
+	var matches = reg.exec(str);
+	if (matches === null) return false;
+	return str === matches[0];
+};
+
+var analyze = function(t) {
+	if (fullMatch(t, /-?\d{1,11}/)) {
+		var v = parseInt(t);
+		var day = (t > 0) && (t < 32);
+		var month = (t > 0) && (t < 13);
+		var type = 'number';
+		if (!day && !month) type = 'year'; 
+		return { 'val' : v, 'type' : type, 'month' : month, 'day' : day };
+	} else {
+		return testString(t);
+	}
+};
+
 var tokenize = function(s) {
 	var result = [];
 	var token = '';
-	var tokenisnumber = false;
 	for (var i = 0; i < s.length; i++) {
 		if (/[\s,]/.test(s[i])) {
 			if (token === '') continue;
-			result.push(token);
+			result.push(analyze(token));
 			token = '';
 			continue;
 		}
-		if (tokenisnumber && !/\d/.test(s[i])) {
-			if (token!=='') result.push(token);
+		if (fullMatch(token, /-?\d+/) && !/\d/.test(s[i])) {
+			if (token!=='') result.push(analyze(token));
 			token = '';
 		}
 		token += s[i];
-		tokenisnumber = /\d+/.test(token);
 	}
-	if (token !== '') result.push(token);
+	if (token !== '') result.push(analyze(token));
 	return result;
 };
 timeparser.tokenize = tokenize;
 
+var matchGrammar = function(grammar, tokens) {
+	var result = {};
+	if (grammar.length !== tokens.length) return null;
+
+	for (var i = 0; i < grammar.length; i++) {
+		if (tokens[i] === null) return null;
+		if (grammar[i] === 'y') {
+			if ((tokens[i].type === 'number') || (tokens[i].type === 'year')) {
+				result.year = tokens[i].val;
+				continue;
+			} else return null;
+		}
+		if (grammar[i] === 'm') {
+			if (((tokens[i].type === 'number') || (tokens[i].type === 'month')) && tokens[i].month) {
+				result.month = tokens[i].val;
+				continue;
+			} else return null;
+		}
+		if (grammar[i] === 'd') {
+			if (((tokens[i].type === 'number') || (tokens[i].type === 'day')) && tokens[i].day) {
+				result.day = tokens[i].val;
+				continue;
+			} else return null;
+		}
+		if (grammar[i] === 'c') {
+			if (tokens[i].type === 'calendar') {
+				result.calendar = tokens[i].val;
+				continue;
+			} else return null;
+		}
+		if (grammar[i] === 'b') {
+			if (tokens[i].type === 'bce') {
+				result.bce = tokens[i].val;
+				continue;
+			} else return null;
+		}			
+		return null;
+	}
+	return result;
+};
+
+var matchGrammars = function(grammars, tokens) {
+	var result = null;
+	for (var i = 0; i < grammars.length; i++) {
+		result = matchGrammar(grammars[i], tokens);
+		if (result !== null) return result;
+	}
+	return null;
+};
+
 var getDateFromText = function(data) {
-	var year = null;
-	var month = null;
-	var day = null;
-	var bce = null;
-	var calendar = null;
+	var tokens = tokenize(data.input);
+	var result = matchGrammars([
+			'y', 'my', 'yb', 'myb', 'mdy', 'dmy', 'mdyb', 'dmyb', 'mdyc', 'dmyc', 'mdybc', 'dmybc'
+		], tokens);
 	
-	var words = tokenize(data.input);
+	if (result === null) return;
 	
-	if (words.length === 1) {
-		var year0 = readAsYear(words[0]);
-
-		if (year0 !== null) {
-			year = year0;
-		}
-	} else if (words.length === 2) {
-		var month0 = readAsMonth(words[0]);
-		var year0 = readAsYear(words[0]);
-		var year1 = readAsYear(words[1]);
-		var bce1 = readAsBCE(words[1]);
-		
-		if ((month0 !== null) && (year1 !== null)) {
-			month = month0;
-			year = year1;
-		} else if ((year0 !== null) && (bce1 !== null)) {
-			bce = bce1;
-			year = year0;
-		}
-	} else if (words.length === 3) {
-		var bce2 = readAsBCE(words[2]);
-		var year1 = readAsYear(words[1]);
-		var year2 = readAsYear(words[2]);
-		var month0 = readAsMonth(words[0]);
-		var month1 = readAsMonth(words[1]);
-		var day0 = readAsDay(words[0]);
-		var day1 = readAsDay(words[1]);
-		
-		if ((month0 !== null) && (year1 !== null) && (bce2 !== null)) {
-			month = month0;
-			year = year1;
-			bce = bce2;
-		} else if ((month0 !== null) && (day1 !== null) && (year2 !== null)) {
-			day = day1;
-			month = month0;
-			year = year2;
-		} else if ((day0 !== null) && (month1 !== null) && (year2 !== null)) {
-			day = day0;
-			month = month1;
-			year = year2;
-		}
-	} else if (words.length === 4) {
-		var calendar3 = readAsCalendar(words[3]);
-		var bce3 = readAsBCE(words[3]);
-		var year2 = readAsYear(words[2]);
-		var month0 = readAsMonth(words[0]);
-		var month1 = readAsMonth(words[1]);
-		var day0 = readAsDay(words[0]);
-		var day1 = readAsDay(words[1]);
-
-		if ((month0 !== null) && (day1 !== null) && (year2 !== null) && (bce3 !== null)) {
-			day = day1;
-			month = month0;
-			year = year2;
-			bce = bce3;
-		} else if ((day0 !== null) && (month1 !== null) && (year2 !== null) && (bce3 !== null)) {
-			day = day0;
-			month = month1;
-			year = year2;
-			bce = bce3;
-		} else if ((month0 !== null) && (day1 !== null) && (year2 !== null) && (calendar3 !== null)) {
-			day = day1;
-			month = month0;
-			year = year2;
-			calendar = calendar3;
-		} else if ((day0 !== null) && (month1 !== null) && (year2 !== null) && (calendar3 !== null)) {
-			day = day0;
-			month = month1;
-			year = year2;
-			calendar = calendar3;
-		}
-	} else if (words.length === 5) {
-		var calendar4 = readAsCalendar(words[4]);
-		var bce3 = readAsBCE(words[3]);
-		var year2 = readAsYear(words[2]);
-		var month0 = readAsMonth(words[0]);
-		var month1 = readAsMonth(words[1]);
-		var day0 = readAsDay(words[0]);
-		var day1 = readAsDay(words[1]);
-
-		if ((month0 !== null) && (day1 !== null) && (year2 !== null) && (bce3 !== null) && (calendar4 !== null)) {
-			day = day1;
-			month = month0;
-			year = year2;
-			bce = bce3;
-			calendar = calendar4;
-		} else if ((day0 !== null) && (month1 !== null) && (year2 !== null) && (bce3 !== null) && (calendar4 !== null)) {
-			day = day0;
-			month = month1;
-			year = year2;
-			bce = bce3;
-			calendar = calendar4;
-		}
+	if (result.bce !== undefined) {
+		if (result.year < 1) return;
+		data.bce = result.bce;
+		if (result.bce) result.year = -1*(result.year - 1);
 	}
-		
-	if (bce !== null) {
-		if (year < 1) return;
-		data.bce = bce;
-		if (bce) year = -1*(year - 1);
-	}
-	if (year !== null) {
-		data.year = year;
-		if (year < 1) data.bce = true;
+	if (result.year !== undefined) {
+		data.year = result.year;
+		if (result.year < 1) data.bce = true;
 		data.precision.internal = 9;
 	}
-	if (month !== null) {
-		data.month = month;
+	if (result.month !== undefined) {
+		data.month = result.month;
 		data.precision.internal = 10;
 	}
-	if (day !== null) {
-		data.day = day;
+	if (result.day !== undefined) {
+		data.day = result.day;
 		data.precision.internal = 11;
 	}
-	if (calendar !== null) {
-		data.calendarname = calendar;
-	} else if (year < 1583) {
+	if (result.calendar !== undefined) {
+		data.calendarname = result.calendar;
+	} else if (result.year < 1583) {
 		data.calendarname = 'Julian';
 	} else {
 		data.calendarname = 'Gregorian';
 	}
+
+	return;
 };
 
 var writeApproximateYear = function(data) {
