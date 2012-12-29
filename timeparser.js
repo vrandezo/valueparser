@@ -153,35 +153,13 @@ var julianToGregorian = function(year, month, day) {
 };
 timeparser.julianToGregorian = julianToGregorian;
 
-var readAsYear = function(word) {
-	var year = parseInt(word);
-	if (isNaN(year)) return null;
-	return year;
-};
-
 var readAsMonth = function(word) {
-	var month = parseInt(word);
-	if (isNaN(month)) {
-		for(var i=0; i<timeparser.settings.monthnames.length; i++) {
-			for(var j=0; j<timeparser.settings.monthnames[i].length; j++) {
-				if (timeparser.settings.monthnames[i][j].toLowerCase() === word.toLowerCase()) {
-					return i+1;
-				}
+	for(var i=0; i<timeparser.settings.monthnames.length; i++) {
+		for(var j=0; j<timeparser.settings.monthnames[i].length; j++) {
+			if (timeparser.settings.monthnames[i][j].toLowerCase() === word.toLowerCase()) {
+				return i+1;
 			}
 		}
-	} else {
-		if ((month > 0) && (month < 13)) {
-			return month;
-		}
-	}
-	return null;
-};
-
-var readAsDay = function(word) {
-	var day = parseInt(word);
-	if (isNaN(day)) return null;
-	if ((day > 0) && (day < 32)) {
-		return day;
 	}
 	return null;
 };
@@ -234,7 +212,7 @@ var fullMatch = function(str, reg) {
 };
 
 var analyze = function(t) {
-	if (fullMatch(t, /-?\d{1,11}/)) {
+	if (fullMatch(t, /\d{1,11}/)) {
 		var v = parseInt(t);
 		var day = (t > 0) && (t < 32);
 		var month = (t > 0) && (t < 13);
@@ -249,14 +227,29 @@ var analyze = function(t) {
 var tokenize = function(s) {
 	var result = [];
 	var token = '';
+	var minus = { 'type' : 'minus', 'val' : '-' };
 	for (var i = 0; i < s.length; i++) {
-		if (/[\s,]/.test(s[i])) {
-			if (token === '') continue;
-			result.push(analyze(token));
-			token = '';
+		if (/[\s,\.\/-]/.test(s[i])) {
+			if (token === '') {
+				if (s[i] === '-') result.push(minus);
+				continue;
+			}
+			var analysis = analyze(token);
+			if (analysis !== null) {
+				result.push(analysis);
+				token = '';
+				continue;
+			}
+			if (s[i] === '-') {
+				result.push(analysis);
+				result.push(minus);
+				token = '';
+				continue;
+			}
+			token += s[i];
 			continue;
 		}
-		if (fullMatch(token, /-?\d+/) && !/\d/.test(s[i])) {
+		if (fullMatch(token, /\d+/) && !/\d/.test(s[i])) {
 			if (token!=='') result.push(analyze(token));
 			token = '';
 		}
@@ -302,11 +295,20 @@ var matchGrammar = function(grammar, tokens) {
 				result.bce = tokens[i].val;
 				continue;
 			} else return null;
-		}			
+		}
+		if (grammar[i] === '-') {
+			if (tokens[i].type === 'minus') {
+				if (grammar[i+1] === 'y') {
+					result.minus = true;
+				}
+				continue;
+			} else return null;
+		}
 		return null;
 	}
 	return result;
 };
+timeparser.matchGrammar = matchGrammar;
 
 var matchGrammars = function(grammars, tokens) {
 	var result = null;
@@ -320,11 +322,16 @@ var matchGrammars = function(grammars, tokens) {
 var getDateFromText = function(data) {
 	var tokens = tokenize(data.input);
 	var result = matchGrammars([
-			'y', 'my', 'yb', 'myb', 'mdy', 'dmy', 'mdyb', 'dmyb', 'mdyc', 'dmyc', 'mdybc', 'dmybc'
+			'y', '-y', 'my', 'm-y', 'yb', 'myb', 'mdy', 'md-y', 'dmy', 'dm-y',
+			'mdyb', 'dmyb', 'mdyc', ',md-yc', 'dmyc', 'dm-yc',
+			'mdybc', 'dmybc', 'ymd', '-ymd', 'ym', '-ym'
 		], tokens);
 	
 	if (result === null) return;
 	
+	if (result.minus !== undefined) {
+		result.year = result.year*-1;
+	}
 	if (result.bce !== undefined) {
 		if (result.year < 1) return;
 		data.bce = result.bce;
