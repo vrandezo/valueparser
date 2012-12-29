@@ -341,6 +341,13 @@ var getDateFromText = function(data) {
 		data.year = result.year;
 		if (result.year < 1) data.bce = true;
 		data.precision.internal = 9;
+		var temp = result.year;
+		if ((temp < -1500) || (temp > 5000)) {
+			while (temp % 10 === 0) {
+				temp /= 10;
+				data.precision.internal -= 1;
+			}
+		}
 	}
 	if (result.month !== undefined) {
 		data.month = result.month;
@@ -352,7 +359,7 @@ var getDateFromText = function(data) {
 	}
 	if (result.calendar !== undefined) {
 		data.calendarname = result.calendar;
-	} else if (result.year < 1583) {
+	} else if ((result.year < 1583) && (data.precision.internal > 10)) {
 		data.calendarname = 'Julian';
 	} else {
 		data.calendarname = 'Gregorian';
@@ -363,8 +370,8 @@ var getDateFromText = function(data) {
 
 var writeApproximateYear = function(data) {
 	var p = data.precision.internal;
-	var significant = Math.floor(Math.abs(data.year)/Math.pow(10, 9-p));
-	if (p<8) significant++;
+	var significant = Math.floor((Math.abs(data.year)-1)/Math.pow(10, 9-p));
+	significant++;
 	var text = timeparser.settings.outputprecision[p].replace('%', significant);
 	if (p < 6) {
 		if (data.bce) {
