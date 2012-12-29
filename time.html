@@ -10,7 +10,7 @@
 result = {};
 $(document).ready(function() {
 	var precision = undefined;
-	var precisionreturned = 1;
+	var precisionreturned = 11;
 	
 	var update = function() {
 		result = timeparser.parse($('#in').val(), precision);
@@ -44,7 +44,8 @@ $(document).ready(function() {
 		update();
 	});
 	$('#precinc').bind('click', function() {
-		if (precisionreturned==timeparser.maxPrecision) return;
+		//if (precisionreturned==timeparser.maxPrecision) return;
+		if (precisionreturned==11) return;
 		precision = precisionreturned+1;
 		update();
 	});
@@ -99,7 +100,7 @@ $(document).ready(function() {
   <div class="left">
    <h1>Time</h1>
     <p>
-     Enter here a point in time:
+     Enter a day here:
     <form>
      <input type="text" id="in" class="in" name="in" autofocus placeholder="Test your value here" style="font-size:200%" />
      <br>
@@ -117,7 +118,7 @@ $(document).ready(function() {
      <br>
      &nbsp;
      <br>
-     Precision: <span id="prec">to the year</span>
+     Precision: <span id="prec">year</span>
      <span id="precinc" class="action">[increase]</span>
      <span id="precdec" class="action">[decrease]</span>
      <span id="precauto" class="action">[auto]</span>

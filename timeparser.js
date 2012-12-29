@@ -10,13 +10,13 @@ timeparser.noConflict = function() {
 };
 
 timeparser.settings = {};
-timeparser.settings.bce = ['BCE', 'BC'];
-timeparser.settings.ace = ['CE', 'AD'];
+timeparser.settings.bce = ['BCE', 'BC', 'B.C.'];
+timeparser.settings.ace = ['CE', 'AD', 'A.D.'];
 timeparser.settings.pasttext = '% ago';
 timeparser.settings.futuretext = 'in %';
 timeparser.settings.calendarnames = [];
-timeparser.settings.calendarnames[0] = ['Gregorian', 'G', 'GD', 'GC', 'NS']
-timeparser.settings.calendarnames[1] = ['Julian', 'J', 'JD', 'JC', 'OS']
+timeparser.settings.calendarnames[0] = ['Gregorian', 'G', 'GD', 'GC', 'NS', 'N.S.']
+timeparser.settings.calendarnames[1] = ['Julian', 'J', 'JD', 'JC', 'OS', 'G.S.']
 timeparser.settings.monthnames = [];
 timeparser.settings.monthnames[0]  = ['January', 'Jan'];
 timeparser.settings.monthnames[1]  = ['February', 'Feb'];
@@ -214,14 +214,20 @@ var readAsCalendar = function(word) {
 var tokenize = function(s) {
 	var result = [];
 	var token = '';
+	var tokenisnumber = false;
 	for (var i = 0; i < s.length; i++) {
-		if (/\s/.test(s[i])) {
+		if (/[\s,]/.test(s[i])) {
 			if (token === '') continue;
 			result.push(token);
 			token = '';
 			continue;
 		}
+		if (tokenisnumber && !/\d/.test(s[i])) {
+			if (token!=='') result.push(token);
+			token = '';
+		}
 		token += s[i];
+		tokenisnumber = /\d+/.test(token);
 	}
 	if (token !== '') result.push(token);
 	return result;
@@ -404,7 +410,7 @@ var getTextFromDate = function(data) {
 		case  9 : return writeYear(data);
 		case 10 : return writeMonth(data);
 		case 11 : return writeDay(data);
-		default : return 'not understood';
+		default : return writeDay(data) + '  (time not implemented yet)';
 	}
 };
 
