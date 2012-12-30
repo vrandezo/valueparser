@@ -5,7 +5,7 @@
   <title>Value parser: Geolocation</title>
   <script type="text/javascript" src="jquery-1.8.1.min.js"></script>          
   <script type="text/javascript" src="json2.js"></script>        
-  <script type="text/javascript" src="geoparser.js"></script>
+  <script type="text/javascript" src="location.js"></script>
   <script src="http://openlayers.org/api/2.12/OpenLayers.js"></script>
   <script type="text/javascript">                                         
 result = {};
@@ -14,7 +14,7 @@ $(document).ready(function() {
 	var precisionreturned = 1.0;
 	
 	var update = function() {
-		result = geoparser.parse($('#in').val(), precision);
+		result = location.parse($('#in').val(), precision);
 		$('#prec').html(result.precision.text);
 		$('#precm').html(result.precision.earthdistance);
 		precisionreturned = result.precision.internal;
@@ -39,11 +39,11 @@ $(document).ready(function() {
 		update();
 	});
 	$('#precinc').bind('click', function() {
-		precision = geoparser.increasePrecision(precisionreturned);
+		precision = location.increasePrecision(precisionreturned);
 		update();
 	});
 	$('#precdec').bind('click', function() {
-		precision = geoparser.decreasePrecision(precisionreturned);
+		precision = location.decreasePrecision(precisionreturned);
 		update();
 	});
 
@@ -82,7 +82,7 @@ $(document).ready(function() {
         	lonlat.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
         	var p = precision;
         	if (p == undefined ) p = 1/60;
-			var result = geoparser.parse(lonlat.lat + ' ' + lonlat.lon, p);
+			var result = location.parse(lonlat.lat + ' ' + lonlat.lon, p);
 			$('#in').val(result.degreetext);
 			update();
         }
