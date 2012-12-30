@@ -18,6 +18,10 @@ $(document).ready(function() {
 		precisionreturned = result.precision.internal;
 		
 		$('#out').html(result.text);
+		$('#jdn').html(result.jdn ? result.jdn : '');
+		$('#gregorian').html(result.gtext);
+		$('#julian').html(result.jtext);
+		$('#gregorian').html(result.getxt);
 		
 		if ((result.year > 1581) && (result.year < 1930) && (result.precision.internal > 10)) {
 			$('#calendar').html('(proleptic ' + result.calendarname + ' calendar)');
@@ -58,9 +62,11 @@ $(document).ready(function() {
 		$('#in').val( $('#out').text() + ' ' + ((result.calendarname === 'Julian')? 'G' : 'J'));
 		update();
 	});
+	$('#showdetails').bind('click', function() { $('#details').toggle(); });
 
 	$('#calchange').hide();
 	$('#in').bind('input', update);
+	$('#details').hide();
 });
   </script>
   <style>
@@ -87,6 +93,9 @@ $(document).ready(function() {
 		font-size  : 60%;
 		color : blue;
 	}
+	a {
+		text-decoration : none;
+	}
   </style>
  </head>
  <body>
@@ -110,18 +119,29 @@ $(document).ready(function() {
      <br>
      &nbsp;
      <br>
-	     <span id="out" style="font-size:200%"> </span>
+	  <span id="out" style="font-size:200%"> &nbsp; </span>
      <br>
-         <span id="calendar"> </span> 
-         <span id="calchange" class="action">[no, change it to the other one!]</span>
+      <span id="calendar"> &nbsp; </span> 
+      <span id="calchange" class="action">[no, change it to the other one!]</span>
      &nbsp;
      <br>
      &nbsp;
      <br>
-     Precision: <span id="prec">year</span>
-     <span id="precinc" class="action">[increase]</span>
-     <span id="precdec" class="action">[decrease]</span>
-     <span id="precauto" class="action">[auto]</span>
+     <span id="showdetails" class="action">[show details]</span>
+     <br>
+     &nbsp;
+     <div id="details">
+	  Precision: <span id="prec">year</span>
+      <span id="precinc" class="action">[increase]</span>
+	  <span id="precdec" class="action">[decrease]</span>
+      <span id="precauto" class="action">[auto]</span>
+      <br>
+      <a href="http://en.wikipedia.org/wiki/Gregorian_calendar">Gregorian calendar</a>: <span id="gregorian"> </span>
+      <br>
+      <a href="http://en.wikipedia.org/wiki/Julian_calendar">Julian calendar</a>: <span id="julian"> </span>
+      <br>
+      <a href="http://en.wikipedia.org/wiki/Julian_day">Julian Day Number</a>: <span id="jdn"> </span>
+     </div>
     </form>
      <br>
      &nbsp;

@@ -87,21 +87,33 @@ var parse = function( text, precision ) {
 	data.utcoffset = '+00:00';
 
 	if (data.calendarname === 'Gregorian') {
+		var result = gregorianToJulian(data.year, data.month, data.day);
+		data.jyear = result.year;
+		data.jmonth = result.month;
+		data.jday = result.day;
 		data.gyear = data.year;
 		data.gmonth = data.month;
 		data.gday = data.day;
-		data.calendar = 'http://wikidata.org/id/Q12138';
+		data.calendar = 'http://wikidata.org/id/Q1985727';
+		data.jdn = gregorianToJulianDay(data.year, data.month, data.day);
 	} else if (data.calendarname === 'Julian') {
 		var result = julianToGregorian(data.year, data.month, data.day);
+		data.jyear = data.year;
+		data.jmonth = data.month;
+		data.jday = data.day;
 		data.gyear = result.year;
 		data.gmonth = result.month;
 		data.gday = result.day;
 		data.calendar = 'http://wikidata.org/id/Q1985786';
+		data.jdn = julianToJulianDay(data.year, data.month, data.day);
 	} else {
+		data.jyear = null;
+		data.jmonth = null;
+		data.jday = null;
 		data.gyear = null;
 		data.gmonth = null;
 		data.gday = null;
-		data.calendar = 'http://wikidata.org/id/Q1985727';
+		data.calendar = null;
 	}
 	
 	if (data.gyear !== null) {
@@ -110,11 +122,12 @@ var parse = function( text, precision ) {
 			 + ':' + pad(data.second, 2) + 'Z';
 	}
 
-	data.text = getTextFromDate(data);
+	data.text = getTextFromDate(data.precision.internal, data.year, data.month, data.day);
+	data.gtext = getTextFromDate(data.precision.internal, data.gyear, data.gmonth, data.gday);
+	data.jtext = getTextFromDate(data.precision.internal, data.jyear, data.jmonth, data.jday);
 	
 	return data;
 };
-timeparser.parse = parse;
 
 var julianToJulianDay = function(year, month, day) {
 	// based on en.wikipedia.org/wiki/Julian_day_number
@@ -123,35 +136,57 @@ var julianToJulianDay = function(year, month, day) {
 	var m = month + 12 * a - 3;
 	return day + Math.floor((153*m + 2)/5) + 365*y + Math.floor(y/4) - 32083;
 };
-timeparser.julianToJulianDay = julianToJulianDay;
 
-var julianDayToGregorian = function(jdn) {
+var gregorianToJulianDay = function(year, month, day) {
 	// based on en.wikipedia.org/wiki/Julian_day_number
+	var a = Math.floor((14-month)/12);
+	var y = year + 4800 - a;
+	var m = month + 12 * a - 3;
+	return day + Math.floor((153*m + 2)/5) + 365*y + Math.floor(y/4) - Math.floor(y/100) + Math.floor(y/400) - 32045;
+};
+
+var julianDayToJulian = function(jdn) {
+	// based on http://www.tondering.dk/claus/cal/julperiod.php
 	var result = {};
-	var j = jdn + 32044;
-	var g = Math.floor(j / 146097);
-	var dg = j % 146097;
-	var c = Math.floor(((Math.floor(dg / 36524) + 1) * 3) / 4);
-	var dc = dg - c*36524;
-	var b = Math.floor(dc / 1461);
-	var db = dc % 1461;
-	var a = Math.floor((Math.floor(db/365) + 1)*3 / 4);
-	var da = db - a*365;
-	var y = g*400 + c*100 + b*4 + a;
-	var m = Math.floor((da*5 + 308) / 153) - 2;
-	var d = da - Math.floor(((m+4)*153)/5) + 122;
-	result.year = y - 4800 + Math.floor((m + 2) / 12);
-	result.month = ((m+2) % 12) + 1;
-	result.day = d + 1;
+	var b = 0;
+	var c = jdn + 32082;
+	
+	var d = Math.floor((4*c + 3) / 1461);
+	var e = c - Math.floor((1461*d)/4);
+	var m = Math.floor((5*e + 2) / 153);
+
+	result.year = 100*b + d - 4800 + Math.floor(m/10);
+	result.month = m + 3 - 12*Math.floor(m/10);
+	result.day = e - Math.floor((153*m + 2) / 5) + 1;
 	return result;
 };
-timeparser.julianDayToGregorian = julianDayToGregorian;
+
+var julianDayToGregorian = function(jdn) {
+	// based on http://www.tondering.dk/claus/cal/julperiod.php
+	var result = {};
+	var a = jdn + 32044;
+	var b = Math.floor((4*a + 3) / 146097);
+	var c = a - Math.floor((146097*b)/4);
+	
+	var d = Math.floor((4*c + 3) / 1461);
+	var e = c - Math.floor((1461*d)/4);
+	var m = Math.floor((5*e + 2) / 153);
+
+	result.year = 100*b + d - 4800 + Math.floor(m/10);
+	result.month = m + 3 - 12*Math.floor(m/10);
+	result.day = e - Math.floor((153*m + 2) / 5) + 1;
+	return result;
+};
 
 var julianToGregorian = function(year, month, day) {
 	var julianday = julianToJulianDay(year, month, day);
 	return julianDayToGregorian(julianday);
 };
-timeparser.julianToGregorian = julianToGregorian;
+
+var gregorianToJulian = function(year, month, day) {
+	var julianday = gregorianToJulianDay(year, month, day);
+	return julianDayToJulian(julianday);
+};
 
 var readAsMonth = function(word) {
 	for(var i=0; i<timeparser.settings.monthnames.length; i++) {
@@ -258,7 +293,6 @@ var tokenize = function(s) {
 	if (token !== '') result.push(analyze(token));
 	return result;
 };
-timeparser.tokenize = tokenize;
 
 var matchGrammar = function(grammar, tokens) {
 	var result = {};
@@ -308,7 +342,6 @@ var matchGrammar = function(grammar, tokens) {
 	}
 	return result;
 };
-timeparser.matchGrammar = matchGrammar;
 
 var matchGrammars = function(grammars, tokens) {
 	var result = null;
@@ -368,52 +401,50 @@ var getDateFromText = function(data) {
 	return;
 };
 
-var writeApproximateYear = function(data) {
-	var p = data.precision.internal;
-	var significant = Math.floor((Math.abs(data.year)-1)/Math.pow(10, 9-p));
-	significant++;
-	var text = timeparser.settings.outputprecision[p].replace('%', significant);
-	if (p < 6) {
-		if (data.bce) {
+var writeApproximateYear = function(year, precision) {
+	var significant = Math.floor((Math.abs(year)-1)/Math.pow(10, 9-precision))+1;
+	var text = timeparser.settings.outputprecision[precision].replace('%', significant);
+	if (precision < 6) {
+		if (year < 0) {
 			text = timeparser.settings.pasttext.replace('%', text);
 		} else {
 			text = timeparser.settings.futuretext.replace('%', text);
 		}
 	} else {
-		if (data.bce) {
+		if (year < 1) {
 			text += ' ' + timeparser.settings.bce[0];
 		}
 	}
 	return text;
 };
 
-var writeYear = function(data) {
-	if (data.bce) {
-		return -1*(data.year-1) + ' ' + timeparser.settings.bce[0];
+var writeYear = function(year) {
+	if (year < 0) {
+		return -1*(year-1) + ' ' + timeparser.settings.bce[0];
 	} 
-	if (data.year === 0) {
+	if (year === 0) {
 		return '1 ' + timeparser.settings.bce[0];
 	} 
-	return data.year;
+	return year;
 };
 
-var writeMonth = function(data) {
-	return timeparser.settings.monthnames[data.month-1][0] + ' ' + writeYear(data);
+var writeMonth = function(year, month) {
+	return timeparser.settings.monthnames[month-1][0] + ' ' + writeYear(year);
 };
 
-var writeDay = function(data) {
-	return timeparser.settings.monthnames[data.month-1][0] + ' ' + data.day + ', ' + writeYear(data);
+var writeDay = function(year, month, day) {
+	return timeparser.settings.monthnames[month-1][0] + ' ' + day + ', ' + writeYear(year);
 };
 
-var getTextFromDate = function(data) {
+var getTextFromDate = function(precision, year, month, day) {
 	var retval = '';
-	if (data.year === null) return '';
-	if (data.precision.internal < 9) return writeApproximateYear(data);
-	switch (data.precision.internal) {
-		case  9 : return writeYear(data);
-		case 10 : return writeMonth(data);
-		case 11 : return writeDay(data);
-		default : return writeDay(data) + '  (time not implemented yet)';
+	if (year === null) return '';
+	if (precision < 9) return writeApproximateYear(year, precision);
+	switch (precision) {
+		case  9 : return writeYear(year);
+		case 10 : return writeMonth(year, month);
+		case 11 : return writeDay(year, month, day);
+		default : return writeDay(year, month, day) + '  (time not implemented yet)';
 	}
 };
 
@@ -421,5 +452,21 @@ var precisionText = function( acc ) {
 	if ((acc > timeparser.settings.maxPrecision) || (acc < 0)) return undefined;
 	return timeparser.settings.precisiontexts[acc];
 };
+
+timeparser.parse = parse;
+
+timeparser.julianToGregorian = julianToGregorian;
+timeparser.gregorianToJulian = gregorianToJulian;
+timeparser.julianToJulianDay = julianToJulianDay;
+timeparser.gregorianToJulianDay = gregorianToJulianDay;
+timeparser.julianDayToGregorian = julianDayToGregorian;
+timeparser.julianDayToJulian = julianDayToJulian;
+
+timeparser.writeApproximateYear = writeApproximateYear;
+timeparser.writeYear = writeYear;
+timeparser.writeMonth = writeMonth;
+timeparser.writeDay = writeDay;
+timeparser.getTextFromDate = getTextFromDate;
 timeparser.precisionText = precisionText;
+
 })(window);
