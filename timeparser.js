@@ -103,10 +103,14 @@ var Time = function( inputtext, precision ) {
 		if (calendarname === 'Julian') {
 			return { 'year' : year, 'month' : month, 'day' : day };
 		} else if (calendarname === 'Gregorian') {
-			return gregorianToJulian(year, month, day);
+			if (year !== null) {
+				return gregorianToJulian(year, month, day);
+			}
 		}
+		return null;
 	};
 	this.jdn = function() {
+		if (year===null) return null;
 		if (calendarname === 'Gregorian') {
 			return gregorianToJulianDay(year, month, day);
 		} else {
