@@ -1,63 +1,63 @@
 (function( window ) {
 
-var timeparser = {};
-var _oldTimeParser = window.timeparser;
-window.timeparser = timeparser;
+var time = {};
+var _oldTime = window.time;
+window.time = time;
 
-timeparser.noConflict = function() {
-	window.timeparser = _oldTimeParser;
-	return timeparser;
+time.noConflict = function() {
+	window.time = _oldTime;
+	return time;
 };
 
-timeparser.settings = {};
-timeparser.settings.bce = ['BCE', 'BC', 'B.C.', 'before Common Era', 'before Christ'];
-timeparser.settings.ace = ['CE', 'AD', 'A.D.', 'Anno Domini', 'Common Era'];
-timeparser.settings.pasttext = '% ago';
-timeparser.settings.futuretext = 'in %';
-timeparser.settings.calendarnames = [];
-timeparser.settings.calendarnames[0] = ['Gregorian', 'G', 'GD', 'GC', 'NS', 'N.S.', 'New Style', 'Gregorian calendar', 'Gregorian date'];
-timeparser.settings.calendarnames[1] = ['Julian', 'J', 'JD', 'JC', 'OS', 'O.S.', 'Old Style', 'Julian calendar', 'Julian date'];
-timeparser.settings.monthnames = [];
-timeparser.settings.monthnames[0]  = ['January', 'Jan'];
-timeparser.settings.monthnames[1]  = ['February', 'Feb'];
-timeparser.settings.monthnames[2]  = ['March', 'Mar'];
-timeparser.settings.monthnames[3]  = ['April', 'Apr'];
-timeparser.settings.monthnames[4]  = ['May'];
-timeparser.settings.monthnames[5]  = ['June', 'Jun'];
-timeparser.settings.monthnames[6]  = ['July', 'Jul'],
-timeparser.settings.monthnames[7]  = ['August', 'Aug'];
-timeparser.settings.monthnames[8]  = ['September', 'Sep'];
-timeparser.settings.monthnames[9]  = ['October', 'Oct'];
-timeparser.settings.monthnames[10] = ['November', 'Nov'];
-timeparser.settings.monthnames[11] = ['December', 'Dec'];
-timeparser.settings.precisiontexts = {};
-timeparser.settings.precisiontexts[0]  = 'billion years';
-timeparser.settings.precisiontexts[1]  = 'hundred million years';
-timeparser.settings.precisiontexts[2]  = 'ten million years';
-timeparser.settings.precisiontexts[3]  = 'million years';
-timeparser.settings.precisiontexts[4]  = '100,000 years';
-timeparser.settings.precisiontexts[5]  = '10,000 years';
-timeparser.settings.precisiontexts[6]  = 'millenium';
-timeparser.settings.precisiontexts[7]  = 'century';
-timeparser.settings.precisiontexts[8]  = 'decade';
-timeparser.settings.precisiontexts[9]  = 'year';
-timeparser.settings.precisiontexts[10] = 'month';
-timeparser.settings.precisiontexts[11] = 'day';
-timeparser.settings.precisiontexts[12] = 'hour';
-timeparser.settings.precisiontexts[13] = 'minute';
-timeparser.settings.precisiontexts[14] = 'second';
-timeparser.settings.outputprecision = {};
-timeparser.settings.outputprecision[0] = '% billion years';
-timeparser.settings.outputprecision[1] = '%00 million years';
-timeparser.settings.outputprecision[2] = '%0 million years';
-timeparser.settings.outputprecision[3] = '% million years';
-timeparser.settings.outputprecision[4] = '%00,000 years';
-timeparser.settings.outputprecision[5] = '%0,000 years';
-timeparser.settings.outputprecision[6] = '%. millenium';
-timeparser.settings.outputprecision[7] = '%. century';
-timeparser.settings.outputprecision[8] = '%0s';
+time.settings = {};
+time.settings.bce = ['BCE', 'BC', 'B.C.', 'before Common Era', 'before Christ'];
+time.settings.ace = ['CE', 'AD', 'A.D.', 'Anno Domini', 'Common Era'];
+time.settings.pasttext = '% ago';
+time.settings.futuretext = 'in %';
+time.settings.calendarnames = [];
+time.settings.calendarnames[0] = ['Gregorian', 'G', 'GD', 'GC', 'NS', 'N.S.', 'New Style', 'Gregorian calendar', 'Gregorian date'];
+time.settings.calendarnames[1] = ['Julian', 'J', 'JD', 'JC', 'OS', 'O.S.', 'Old Style', 'Julian calendar', 'Julian date'];
+time.settings.monthnames = [];
+time.settings.monthnames[0]  = ['January', 'Jan'];
+time.settings.monthnames[1]  = ['February', 'Feb'];
+time.settings.monthnames[2]  = ['March', 'Mar'];
+time.settings.monthnames[3]  = ['April', 'Apr'];
+time.settings.monthnames[4]  = ['May'];
+time.settings.monthnames[5]  = ['June', 'Jun'];
+time.settings.monthnames[6]  = ['July', 'Jul'],
+time.settings.monthnames[7]  = ['August', 'Aug'];
+time.settings.monthnames[8]  = ['September', 'Sep'];
+time.settings.monthnames[9]  = ['October', 'Oct'];
+time.settings.monthnames[10] = ['November', 'Nov'];
+time.settings.monthnames[11] = ['December', 'Dec'];
+time.settings.precisiontexts = {};
+time.settings.precisiontexts[0]  = 'billion years';
+time.settings.precisiontexts[1]  = 'hundred million years';
+time.settings.precisiontexts[2]  = 'ten million years';
+time.settings.precisiontexts[3]  = 'million years';
+time.settings.precisiontexts[4]  = '100,000 years';
+time.settings.precisiontexts[5]  = '10,000 years';
+time.settings.precisiontexts[6]  = 'millenium';
+time.settings.precisiontexts[7]  = 'century';
+time.settings.precisiontexts[8]  = 'decade';
+time.settings.precisiontexts[9]  = 'year';
+time.settings.precisiontexts[10] = 'month';
+time.settings.precisiontexts[11] = 'day';
+time.settings.precisiontexts[12] = 'hour';
+time.settings.precisiontexts[13] = 'minute';
+time.settings.precisiontexts[14] = 'second';
+time.settings.outputprecision = {};
+time.settings.outputprecision[0] = '% billion years';
+time.settings.outputprecision[1] = '%00 million years';
+time.settings.outputprecision[2] = '%0 million years';
+time.settings.outputprecision[3] = '% million years';
+time.settings.outputprecision[4] = '%00,000 years';
+time.settings.outputprecision[5] = '%0,000 years';
+time.settings.outputprecision[6] = '%. millenium';
+time.settings.outputprecision[7] = '%. century';
+time.settings.outputprecision[8] = '%0s';
 
-timeparser.maxPrecision = function() { return 14; };
+time.maxPrecision = function() { return 14; };
 
 var pad = function(number,digits) { return (1e12 + Math.abs(number) + '').slice(-digits); }
 
@@ -205,9 +205,9 @@ var gregorianToJulian = function(year, month, day) {
 };
 
 var readAsMonth = function(word) {
-	for(var i=0; i<timeparser.settings.monthnames.length; i++) {
-		for(var j=0; j<timeparser.settings.monthnames[i].length; j++) {
-			if (timeparser.settings.monthnames[i][j].toLowerCase() === word.toLowerCase()) {
+	for(var i=0; i<time.settings.monthnames.length; i++) {
+		for(var j=0; j<time.settings.monthnames[i].length; j++) {
+			if (time.settings.monthnames[i][j].toLowerCase() === word.toLowerCase()) {
 				return i+1;
 			}
 		}
@@ -216,13 +216,13 @@ var readAsMonth = function(word) {
 };
 
 var readAsBCE = function(word) {
-	for(var i=0; i<timeparser.settings.bce.length; i++) {
-		if (timeparser.settings.bce[i].toLowerCase() === word.toLowerCase()) {
+	for(var i=0; i<time.settings.bce.length; i++) {
+		if (time.settings.bce[i].toLowerCase() === word.toLowerCase()) {
 			return true;
 		}
 	}
-	for(var i=0; i<timeparser.settings.ace.length; i++) {
-		if (timeparser.settings.ace[i].toLowerCase() === word.toLowerCase()) {
+	for(var i=0; i<time.settings.ace.length; i++) {
+		if (time.settings.ace[i].toLowerCase() === word.toLowerCase()) {
 			return false;
 		}
 	}
@@ -230,10 +230,10 @@ var readAsBCE = function(word) {
 };
 
 var readAsCalendar = function(word) {
-	for (var i=0; i<timeparser.settings.calendarnames.length; i++) {
-		for (var j=0; j<timeparser.settings.calendarnames[i].length; j++) {
-			if (timeparser.settings.calendarnames[i][j].toLowerCase() === word.toLowerCase()) {
-				return timeparser.settings.calendarnames[i][0];
+	for (var i=0; i<time.settings.calendarnames.length; i++) {
+		for (var j=0; j<time.settings.calendarnames[i].length; j++) {
+			if (time.settings.calendarnames[i][j].toLowerCase() === word.toLowerCase()) {
+				return time.settings.calendarnames[i][0];
 			}
 		}
 	}
@@ -421,16 +421,16 @@ var parse = function(text) {
 
 var writeApproximateYear = function(year, precision) {
 	var significant = Math.floor((Math.abs(year)-1)/Math.pow(10, 9-precision))+1;
-	var text = timeparser.settings.outputprecision[precision].replace('%', significant);
+	var text = time.settings.outputprecision[precision].replace('%', significant);
 	if (precision < 6) {
 		if (year < 0) {
-			text = timeparser.settings.pasttext.replace('%', text);
+			text = time.settings.pasttext.replace('%', text);
 		} else {
-			text = timeparser.settings.futuretext.replace('%', text);
+			text = time.settings.futuretext.replace('%', text);
 		}
 	} else {
 		if (year < 1) {
-			text += ' ' + timeparser.settings.bce[0];
+			text += ' ' + time.settings.bce[0];
 		}
 	}
 	return text;
@@ -438,20 +438,20 @@ var writeApproximateYear = function(year, precision) {
 
 var writeYear = function(year) {
 	if (year < 0) {
-		return -1*(year-1) + ' ' + timeparser.settings.bce[0];
+		return -1*(year-1) + ' ' + time.settings.bce[0];
 	} 
 	if (year === 0) {
-		return '1 ' + timeparser.settings.bce[0];
+		return '1 ' + time.settings.bce[0];
 	} 
 	return year;
 };
 
 var writeMonth = function(year, month) {
-	return timeparser.settings.monthnames[month-1][0] + ' ' + writeYear(year);
+	return time.settings.monthnames[month-1][0] + ' ' + writeYear(year);
 };
 
 var writeDay = function(year, month, day) {
-	return timeparser.settings.monthnames[month-1][0] + ' ' + day + ', ' + writeYear(year);
+	return time.settings.monthnames[month-1][0] + ' ' + day + ', ' + writeYear(year);
 };
 
 var getTextFromDate = function(precision, year, month, day) {
@@ -467,24 +467,24 @@ var getTextFromDate = function(precision, year, month, day) {
 };
 
 var precisionText = function( acc ) {
-	if ((acc > timeparser.settings.maxPrecision) || (acc < 0)) return undefined;
-	return timeparser.settings.precisiontexts[acc];
+	if ((acc > time.settings.maxPrecision()) || (acc < 0)) return undefined;
+	return time.settings.precisiontexts[acc];
 };
 
-timeparser.Time = Time;
+time.Time = Time;
 
-timeparser.julianToGregorian = julianToGregorian;
-timeparser.gregorianToJulian = gregorianToJulian;
-timeparser.julianToJulianDay = julianToJulianDay;
-timeparser.gregorianToJulianDay = gregorianToJulianDay;
-timeparser.julianDayToGregorian = julianDayToGregorian;
-timeparser.julianDayToJulian = julianDayToJulian;
+time.julianToGregorian = julianToGregorian;
+time.gregorianToJulian = gregorianToJulian;
+time.julianToJulianDay = julianToJulianDay;
+time.gregorianToJulianDay = gregorianToJulianDay;
+time.julianDayToGregorian = julianDayToGregorian;
+time.julianDayToJulian = julianDayToJulian;
 
-timeparser.writeApproximateYear = writeApproximateYear;
-timeparser.writeYear = writeYear;
-timeparser.writeMonth = writeMonth;
-timeparser.writeDay = writeDay;
-timeparser.getTextFromDate = getTextFromDate;
-timeparser.precisionText = precisionText;
+time.writeApproximateYear = writeApproximateYear;
+time.writeYear = writeYear;
+time.writeMonth = writeMonth;
+time.writeDay = writeDay;
+time.getTextFromDate = getTextFromDate;
+time.precisionText = precisionText;
 
 })(window);

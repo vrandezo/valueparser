@@ -5,7 +5,7 @@
   <title>Value parser: Time</title>
   <script type="text/javascript" src="jquery-1.8.1.min.js"></script>          
   <script type="text/javascript" src="json2.js"></script>        
-  <script type="text/javascript" src="timeparser.js"></script>
+  <script type="text/javascript" src="time.js"></script>
   <script type="text/javascript">                                         
 result = {};
 $(document).ready(function() {
@@ -13,7 +13,7 @@ $(document).ready(function() {
 	var precisionreturned = 11;
 	
 	var update = function() {
-		result = new timeparser.Time($('#in').val(), precision);
+		result = new time.Time($('#in').val(), precision);
 		$('#prec').html(result.precisionText());
 		precisionreturned = result.precision();
 		
@@ -47,7 +47,7 @@ $(document).ready(function() {
 		update();
 	});
 	$('#precinc').bind('click', function() {
-		//if (precisionreturned==timeparser.maxPrecision()) return;
+		//if (precisionreturned==time.maxPrecision()) return;
 		if (precisionreturned==11) return;
 		precision = precisionreturned+1;
 		update();
