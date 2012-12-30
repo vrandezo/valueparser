@@ -13,32 +13,31 @@ $(document).ready(function() {
 	var precisionreturned = 11;
 	
 	var update = function() {
-		result = timeparser.parse($('#in').val(), precision);
-		$('#prec').html(result.precision.text);
-		precisionreturned = result.precision.internal;
+		result = new timeparser.Time($('#in').val(), precision);
+		$('#prec').html(result.precisionText());
+		precisionreturned = result.precision();
 		
-		$('#out').html(result.text);
-		$('#jdn').html(result.jdn ? result.jdn : '');
-		$('#gregorian').html(result.gtext);
-		$('#julian').html(result.jtext);
-		$('#gregorian').html(result.getxt);
+		$('#out').html(result.text());
+		$('#jdn').html(result.jdn());
+		$('#gregorian').html(result.gregorianText());
+		$('#julian').html(result.julianText());
 		
-		if ((result.year > 1581) && (result.year < 1930) && (result.precision.internal > 10)) {
-			$('#calendar').html('(proleptic ' + result.calendarname + ' calendar)');
+		if ((result.year() > 1581) && (result.year() < 1930) && (result.precision() > 10)) {
+			$('#calendar').html('(proleptic ' + result.calendarText() + ' calendar)');
 			$('#calchange').show();
 		} else {
 			$('#calendar').html('');
 			$('#calchange').hide();
 		}
 
-		$('#all').text(JSON.stringify(result, null, 2));
+		$('#all').text(JSON.stringify({}, null, 2));
 		var safe = {
-			'time' : result.time,
-			'precision' : result.precision.internal,
-			'before' : result.precision.before,
-			'after' : result.precision.after,
-			'utcoffset' : result.utcoffset,
-			'calendar' : result.calendar
+			'time' : result.iso8601(),
+			'precision' : result.precision(),
+			'before' : result.before(),
+			'after' : result.after(),
+			'utcoffset' : result.utcoffset(),
+			'calendar' : result.calendarURI()
 		}
 		$('#save').text(JSON.stringify(safe, null, 2));
 	}
@@ -48,7 +47,7 @@ $(document).ready(function() {
 		update();
 	});
 	$('#precinc').bind('click', function() {
-		//if (precisionreturned==timeparser.maxPrecision) return;
+		//if (precisionreturned==timeparser.maxPrecision()) return;
 		if (precisionreturned==11) return;
 		precision = precisionreturned+1;
 		update();
@@ -59,7 +58,7 @@ $(document).ready(function() {
 		update();
 	});
 	$('#calchange').bind('click', function() {
-		$('#in').val( $('#out').text() + ' ' + ((result.calendarname === 'Julian')? 'G' : 'J'));
+		$('#in').val( $('#out').text() + ' ' + ((result.calendarText() === 'Julian')? 'G' : 'J'));
 		update();
 	});
 	$('#showdetails').bind('click', function() { $('#details').toggle(); });

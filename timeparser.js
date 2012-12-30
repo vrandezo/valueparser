@@ -57,76 +57,88 @@ timeparser.settings.outputprecision[6] = '%. millenium';
 timeparser.settings.outputprecision[7] = '%. century';
 timeparser.settings.outputprecision[8] = '%0s';
 
-timeparser.maxPrecision =  14;
+timeparser.maxPrecision = function() { return 14; };
 
 var pad = function(number,digits) { return (1e12 + Math.abs(number) + '').slice(-digits); }
 
-var parse = function( text, precision ) {
-	var data = {};
-	data.input = text;
+var Time = function( inputtext, precision ) {
+	var inputprecision = precision;
 	
-	data.bce = false;
-	data.year = null;
-	data.month = 1;
-	data.day = 1;
-	data.hour = 0;
-	data.minute = 0;
-	data.second = 0;
-	data.precision = {};
+	this.getInputtext = function() { return inputtext; };
 	
-	getDateFromText(data);
+	var result = parse(inputtext);
+	if (result === null) result = {};
 
-	if (precision !== undefined) {
-		data.precision.internal = precision;
+	var bce = (result.bce !== undefined) ? result.bce : false;
+	var year = (result.year !== undefined) ? result.year : null;
+	var month = (result.month !== undefined) ? result.month : 1;
+	var day = (result.day !== undefined) ? result.day : 1;
+	var hour = (result.hour !== undefined) ? result.hour : 0;
+	var minute = (result.minute !== undefined) ? result.minute : 0;
+	var second = (result.second !== undefined) ? result.second : 0;
+	var utcoffset = '+00:00';
+	var calendarname = (result.calendarname !== undefined) ? result.calendarname : 'Gregorian';
+	
+	this.year = function() { return year; };
+	this.month = function() { return month; };
+	this.day = function() { return day; };
+	this.utcoffset = function() { return utcoffset; };
+	
+	var precision = (inputprecision !== undefined)? inputprecision : result.precision;
+	this.precision = function() { return precision; };
+	this.precisionText = function() { return precisionText( precision ); };
+	var before = 0;
+	var after = 0;
+	this.before = function() { return before; };
+	this.after = function() { return after; };
+	
+	this.gregorian = function() {
+		if (calendarname === 'Gregorian') {
+			return { 'year' : year, 'month' : month, 'day' : day };
+		} else if (calendarname === 'Julian') {
+			return julianToGregorian(year, month, day);
+		}
+	};
+	this.julian = function() {
+		if (calendarname === 'Julian') {
+			return { 'year' : year, 'month' : month, 'day' : day };
+		} else if (calendarname === 'Gregorian') {
+			return gregorianToJulian(year, month, day);
+		}
+	};
+	this.jdn = function() {
+		if (calendarname === 'Gregorian') {
+			return gregorianToJulianDay(year, month, day);
+		} else {
+			return julianToJulianDay(year, month, day);
+		}
+	};
+
+	this.calendarText = function() { return calendarname; };
+	this.calendarURI = function() {
+		if (calendarname === 'Gregorian') {
+			return 'http://wikidata.org/id/Q1985727';
+		} else if (calendarname === 'Julian') {
+			return 'http://wikidata.org/id/Q1985786';
+		}
 	}
-
-	data.precision.text = precisionText( data.precision.internal );
-	data.precision.before = 0;
-	data.precision.after = 0;
 	
-	data.utcoffset = '+00:00';
+	this.iso8601 = function() {
+		var g = this.gregorian();
+		return ((g.year<0)?'-':'+') + pad(g.year, 11) + '-' + pad(g.month, 2)
+			 + '-' + pad(g.day, 2) + 'T' + pad(hour, 2) + ':' + pad(minute, 2)
+			 + ':' + pad(second, 2) + 'Z';
+	};
 
-	if (data.calendarname === 'Gregorian') {
-		var result = gregorianToJulian(data.year, data.month, data.day);
-		data.jyear = result.year;
-		data.jmonth = result.month;
-		data.jday = result.day;
-		data.gyear = data.year;
-		data.gmonth = data.month;
-		data.gday = data.day;
-		data.calendar = 'http://wikidata.org/id/Q1985727';
-		data.jdn = gregorianToJulianDay(data.year, data.month, data.day);
-	} else if (data.calendarname === 'Julian') {
-		var result = julianToGregorian(data.year, data.month, data.day);
-		data.jyear = data.year;
-		data.jmonth = data.month;
-		data.jday = data.day;
-		data.gyear = result.year;
-		data.gmonth = result.month;
-		data.gday = result.day;
-		data.calendar = 'http://wikidata.org/id/Q1985786';
-		data.jdn = julianToJulianDay(data.year, data.month, data.day);
-	} else {
-		data.jyear = null;
-		data.jmonth = null;
-		data.jday = null;
-		data.gyear = null;
-		data.gmonth = null;
-		data.gday = null;
-		data.calendar = null;
-	}
-	
-	if (data.gyear !== null) {
-		data.time = ((data.gyear<0)?'-':'+') + pad(data.gyear, 11) + '-' + pad(data.gmonth, 2)
-			 + '-' + pad(data.gday, 2) + 'T' + pad(data.hour, 2) + ':' + pad(data.minute, 2)
-			 + ':' + pad(data.second, 2) + 'Z';
-	}
-
-	data.text = getTextFromDate(data.precision.internal, data.year, data.month, data.day);
-	data.gtext = getTextFromDate(data.precision.internal, data.gyear, data.gmonth, data.gday);
-	data.jtext = getTextFromDate(data.precision.internal, data.jyear, data.jmonth, data.jday);
-	
-	return data;
+	this.text =  function() { return getTextFromDate(precision, year, month, day); };
+	this.gregorianText = function() {
+		var result = this.gregorian();
+		return getTextFromDate(precision, result.year, result.month, result.day);
+	};
+	this.julianText = function() {
+		var result = this.julian();
+		return getTextFromDate(precision, result.year, result.month, result.day);
+	};
 };
 
 var julianToJulianDay = function(year, month, day) {
@@ -352,53 +364,55 @@ var matchGrammars = function(grammars, tokens) {
 	return null;
 };
 
-var getDateFromText = function(data) {
-	var tokens = tokenize(data.input);
+var parse = function(text) {
+	var tokens = tokenize(text);
+	var retval = {};
 	var result = matchGrammars([
 			'y', '-y', 'my', 'm-y', 'yb', 'myb', 'mdy', 'md-y', 'dmy', 'dm-y',
 			'mdyb', 'dmyb', 'mdyc', ',md-yc', 'dmyc', 'dm-yc',
 			'mdybc', 'dmybc', 'ymd', '-ymd', 'ym', '-ym'
 		], tokens);
 	
-	if (result === null) return;
+	if (result === null) return null;
 	
 	if (result.minus !== undefined) {
 		result.year = result.year*-1;
 	}
 	if (result.bce !== undefined) {
 		if (result.year < 1) return;
-		data.bce = result.bce;
+		retval.bce = result.bce;
 		if (result.bce) result.year = -1*(result.year - 1);
 	}
 	if (result.year !== undefined) {
-		data.year = result.year;
-		if (result.year < 1) data.bce = true;
-		data.precision.internal = 9;
+		retval.year = result.year;
 		var temp = result.year;
+		if (retval.bce) temp -= 1;
+		if (result.year < 1) retval.bce = true;
+		retval.precision = 9;
 		if ((temp < -1500) || (temp > 5000)) {
 			while (temp % 10 === 0) {
 				temp /= 10;
-				data.precision.internal -= 1;
+				retval.precision -= 1;
 			}
 		}
 	}
 	if (result.month !== undefined) {
-		data.month = result.month;
-		data.precision.internal = 10;
+		retval.month = result.month;
+		retval.precision = 10;
 	}
 	if (result.day !== undefined) {
-		data.day = result.day;
-		data.precision.internal = 11;
+		retval.day = result.day;
+		retval.precision = 11;
 	}
 	if (result.calendar !== undefined) {
-		data.calendarname = result.calendar;
-	} else if ((result.year < 1583) && (data.precision.internal > 10)) {
-		data.calendarname = 'Julian';
+		retval.calendarname = result.calendar;
+	} else if ((result.year < 1583) && (retval.precision > 10)) {
+		retval.calendarname = 'Julian';
 	} else {
-		data.calendarname = 'Gregorian';
+		retval.calendarname = 'Gregorian';
 	}
 
-	return;
+	return retval;
 };
 
 var writeApproximateYear = function(year, precision) {
@@ -453,7 +467,7 @@ var precisionText = function( acc ) {
 	return timeparser.settings.precisiontexts[acc];
 };
 
-timeparser.parse = parse;
+timeparser.Time = Time;
 
 timeparser.julianToGregorian = julianToGregorian;
 timeparser.gregorianToJulian = gregorianToJulian;

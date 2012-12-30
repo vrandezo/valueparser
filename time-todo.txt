@@ -1,3 +1,6 @@
 hours and higher detail
 time intervals (not as intervals though)
+
 make timeparser an object
+* make settings objectible
+* make a few things settable
