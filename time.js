@@ -141,6 +141,7 @@ var Time = function( inputtext, precision ) {
 	};
 	this.julianText = function() {
 		var result = this.julian();
+		if (result === null) return '';
 		return getTextFromDate(precision, result.year, result.month, result.day);
 	};
 };
@@ -467,7 +468,7 @@ var getTextFromDate = function(precision, year, month, day) {
 };
 
 var precisionText = function( acc ) {
-	if ((acc > time.settings.maxPrecision()) || (acc < 0)) return undefined;
+	if ((acc > time.maxPrecision()) || (acc < 0)) return undefined;
 	return time.settings.precisiontexts[acc];
 };
 
