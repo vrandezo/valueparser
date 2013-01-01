@@ -2,10 +2,10 @@
 <html>
  <head>
   <meta charset="utf-8">
-  <title>Value parser: Geolocation</title>
+  <title>Value parser: Coordinate</title>
   <script type="text/javascript" src="jquery-1.8.1.min.js"></script>          
   <script type="text/javascript" src="json2.js"></script>        
-  <script type="text/javascript" src="location.js"></script>
+  <script type="text/javascript" src="coordinate.js"></script>
   <script src="http://openlayers.org/api/2.12/OpenLayers.js"></script>
   <script type="text/javascript">                                         
 result = {};
@@ -14,21 +14,21 @@ $(document).ready(function() {
 	var precisionreturned = 1.0;
 	
 	var update = function() {
-		result = location.parse($('#in').val(), precision);
-		$('#prec').html(result.precision.text);
-		$('#precm').html(result.precision.earthdistance);
-		precisionreturned = result.precision.internal;
+		result = new coordinate.Coordinate($('#in').val(), precision);
+		$('#prec').html(result.precisionText());
+		$('#precm').html(result.precisionTextEarth());
+		precisionreturned = result.precisionInternal();
 		
-		$('#dec').html(result.decimaltext);
-		$('#deg').html(result.degreetext);
+		$('#dec').html(result.decimalText());
+		$('#deg').html(result.degreeText());
 
-		center(result.latitude.internal, result.longitude.internal);
+		center(result.latitudeInternal(), result.longitudeInternal());
 
 		$('#all').text(JSON.stringify(result, null, 2));
 		var safe = {
-			'latitude' : result.latitude.internal,
-			'longitude' : result.longitude.internal,
-			'precision' : result.precision.internal,
+			'latitude' : result.latitudeInternal(),
+			'longitude' : result.longitudeInternal(),
+			'precision' : result.precisionInternal(),
 			'globe' : 'http://wikidata.org/id/Q2'
 		}
 		$('#save').text(JSON.stringify(safe, null, 2));
@@ -39,11 +39,11 @@ $(document).ready(function() {
 		update();
 	});
 	$('#precinc').bind('click', function() {
-		precision = location.increasePrecision(precisionreturned);
+		precision = result.increasePrecision();
 		update();
 	});
 	$('#precdec').bind('click', function() {
-		precision = location.decreasePrecision(precisionreturned);
+		precision = result.decreasePrecision();
 		update();
 	});
 
@@ -82,7 +82,7 @@ $(document).ready(function() {
         	lonlat.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
         	var p = precision;
         	if (p == undefined ) p = 1/60;
-			var result = location.parse(lonlat.lat + ' ' + lonlat.lon, p);
+			var result = coordinate.parse(lonlat.lat + ' ' + lonlat.lon, p);
 			$('#in').val(result.degreetext);
 			update();
         }
@@ -135,9 +135,9 @@ $(document).ready(function() {
    <pre id="save">{}</pre>
   </div>
   <div class="left">
-   <h1>Geolocation</h1>
+   <h1>Coordinate</h1>
     <p>
-     Enter here a geolocation (assuming WGS84 datums):
+     Enter here a coordinate (assuming a WGS84 datum on Earth for now):
     <form>
      <input type="text" id="in" class="in" name="in" autofocus placeholder="Test your value here" style="font-size:200%" />
      <br>

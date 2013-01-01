@@ -1,32 +1,32 @@
 (function( window ) {
 
-var location = {};
-var _oldLocation = window.location;
-window.location = location;
+var coordinate = {};
+var _oldCoordinate = window.coordinate;
+window.coordinate = coordinate;
 
-location.noConflict = function() {
-	window.location = _oldLocation;
-	return location;
+coordinate.noConflict = function() {
+	window.coordinate = _oldCoordinate;
+	return coordinate;
 };
 
-location.settings = {};
-location.settings.north = 'N';
-location.settings.east = 'E';
-location.settings.south = 'S';
-location.settings.west = 'W';
-location.settings.dot = '.';
-location.settings.latlongcombinator = ', ';
-location.settings.degree = '°';
-location.settings.minute = '\'';
-location.settings.second = '"';
-location.settings.precisiontexts = {};
-location.settings.precisiontexts.degree = 'to a degree';
-location.settings.precisiontexts.minute = 'to an arcminute';
-location.settings.precisiontexts.second = 'to an arcsecond';
-location.settings.precisiontexts.decisecond = 'to a tenth of an arcsecond';
-location.settings.precisiontexts.centisecond = 'to the hundredth of an arcsecond';
-location.settings.precisiontexts.milisecond = 'to the thousandth of an arcsecond';
-location.settings.precisiontexts.maximal = 'maximal';
+coordinate.settings = {};
+coordinate.settings.north = 'N';
+coordinate.settings.east = 'E';
+coordinate.settings.south = 'S';
+coordinate.settings.west = 'W';
+coordinate.settings.dot = '.';
+coordinate.settings.latlongcombinator = ', ';
+coordinate.settings.degree = '°';
+coordinate.settings.minute = '\'';
+coordinate.settings.second = '"';
+coordinate.settings.precisiontexts = {};
+coordinate.settings.precisiontexts.degree = 'to a degree';
+coordinate.settings.precisiontexts.minute = 'to an arcminute';
+coordinate.settings.precisiontexts.second = 'to an arcsecond';
+coordinate.settings.precisiontexts.decisecond = 'to a tenth of an arcsecond';
+coordinate.settings.precisiontexts.centisecond = 'to the hundredth of an arcsecond';
+coordinate.settings.precisiontexts.milisecond = 'to the thousandth of an arcsecond';
+coordinate.settings.precisiontexts.maximal = 'maximal';
 
 var peggeoparser = (function(){
   /*
@@ -180,7 +180,7 @@ var peggeoparser = (function(){
               }
             }
             if (result2 !== null) {
-              if (input.substr(pos, 1).toUpperCase() === location.settings.north) {
+              if (input.substr(pos, 1).toUpperCase() === coordinate.settings.north) {
                 result3 = input.substr(pos, 1);
                 pos++;
               } else {
@@ -191,7 +191,7 @@ var peggeoparser = (function(){
               }
               result3 = result3 !== null ? result3 : "";
               if (result3 !== null) {
-                if (input.substr(pos, 1).toUpperCase() === location.settings.south) {
+                if (input.substr(pos, 1).toUpperCase() === coordinate.settings.south) {
                   result4 = input.substr(pos, 1);
                   pos++;
                 } else {
@@ -250,7 +250,7 @@ var peggeoparser = (function(){
                         }
                       }
                       if (result7 !== null) {
-                        if (input.substr(pos, 1).toUpperCase() === location.settings.east) {
+                        if (input.substr(pos, 1).toUpperCase() === coordinate.settings.east) {
                           result8 = input.substr(pos, 1);
                           pos++;
                         } else {
@@ -261,7 +261,7 @@ var peggeoparser = (function(){
                         }
                         result8 = result8 !== null ? result8 : "";
                         if (result8 !== null) {
-                          if (input.substr(pos, 1).toUpperCase() === location.settings.west) {
+                          if (input.substr(pos, 1).toUpperCase() === coordinate.settings.west) {
                             result9 = input.substr(pos, 1);
                             pos++;
                           } else {
@@ -344,8 +344,8 @@ var peggeoparser = (function(){
           result0 = (function(offset, latitude, north, south, longitude, east, west) { 
               var lat = (south!='')? latitude[0] * -1 : latitude[0];
               var lon = (west!='')? longitude[0] * -1 : longitude[0];
-              var acc = Math.min(latitude[1], longitude[1]);
-              return [lat, lon, acc];
+              var precision = Math.min(latitude[1], longitude[1]);
+              return [lat, lon, precision];
             })(pos0, result0[1], result0[3], result0[4], result0[6], result0[8], result0[9]);
         }
         if (result0 === null) {
@@ -529,18 +529,18 @@ var peggeoparser = (function(){
         if (result0 !== null) {
           result0 = (function(offset, sign, full, min, dotsec, sec, postdot) { 
               var r = full + min/60 + sec/3600;
-              var acc = 1;
-              if (min>0) acc=1/60;
-              if (sec>0) acc=1/3600;
+              var precision = 1;
+              if (min>0) precision=1/60;
+              if (sec>0) precision=1/3600;
               if (dotsec=='\'') {
                 r += (postdot[0]/3600);
-                if (postdot[1]>0) acc = (1/3600)/Math.pow(10, postdot[1]);
+                if (postdot[1]>0) precision = (1/3600)/Math.pow(10, postdot[1]);
               } else {
                 r += postdot[0];
-                if (postdot[1]>0) acc = 1/Math.pow(10, postdot[1]);
+                if (postdot[1]>0) precision = 1/Math.pow(10, postdot[1]);
               }
               if (sign=='-') r *= -1;
-              return [r, acc];
+              return [r, precision];
             })(pos0, result0[0], result0[1], result0[4], result0[5], result0[7], result0[8]);
         }
         if (result0 === null) {
@@ -604,8 +604,8 @@ var peggeoparser = (function(){
               var t = '.' + digits.join('').toString();
               var r = parseFloat(t, 10);
               if (isNaN(r)) return [0, 0];
-              var acc = t.length - 1;
-              return [r, acc];
+              var precision = t.length - 1;
+              return [r, precision];
             })(pos0, result0[0], result0[1]);
         }
         if (result0 === null) {
@@ -786,65 +786,74 @@ var peggeoparser = (function(){
   return result;
 })();
 
-location.parse = function( text, precision ) {
-	var data = {};
-	data.input = text;
-	var result = {};
+coordinate.Coordinate = function( inputtext, precision ) {
+	var inputprecision = precision;
+	
+	this.getInputtext = function() { return inputtext; };
+	
+	var result = [0, 0, 0];
+
 	try {
 		result = peggeoparser.parse(data.input);
 	} catch (err) {
 		result = [0, 0, 0];
-		data.error = err.toString();
+		this.error = err.toString();
 	}
 
-	data.latitude = { 'internal' : result[0]  };
-	data.longitude = { 'internal' : result[1] };
-	if (precision == undefined) {
-		data.precision = { 'internal' : result[2] };
-	} else {
-		data.precision = { 'internal' : precision };
-	}
+	var latitude = result[0];
+	var longitude = result[1];
+	this.latitudeInternal = function() { return latitude; }
+	this.longitudeInternal = function() { return longitude; }
 	
-	data.latitude.direction = (data.latitude.internal < 0) ? location.settings.south : location.settings.north;
-	data.latitude = location.toDegree(data.latitude, data.precision.internal);
-	data.latitude = location.toDecimal(data.latitude, data.precision.internal);
+	if (precision == undefined) {
+		precision = result[2];
+	}
+	this.precisionInternal = function() { return precision; }
+	this.precisionText = function() { return precisionText(precision); };
+	this.precisionTextEarth = function() { return precisionTextEarth(precision); };
+	
+	this.increasePrecision = function() {
+		precision = increasePrecision(precision);
+	};
+	this.decreasePrecision = function() {
+		precision = decreasePrecision(precision);
+	};
+	
+	this.northsouth = function() { return (latitude < 0) ? coordinate.settings.south : coordinate.settings.north; };
+	this.eastwest = function() { return (longitude < 0) ? coordinate.settings.west : coordinate.settings.east; };
 
-	data.longitude.direction = (data.longitude.internal < 0) ? location.settings.west : location.settings.east;
-	data.longitude = location.toDegree(data.longitude, data.precision.internal);
-	data.longitude = location.toDecimal(data.longitude, data.precision.internal);
-
-	data.degreetext = data.latitude.degreetext + location.settings.latlongcombinator + data.longitude.degreetext;
-	data.decimaltext = data.latitude.decimaltext + location.settings.latlongcombinator + data.longitude.decimaltext;
-	data.precision.text = location.precisionText( data.precision.internal );
-	data.precision.earthdistance = location.precisionOnEarthInMetric( data.precision.internal );
-
-	return data;
+	this.latitudeDegree = function() { return toDegree(latitude, precision); };
+	this.longitudeDegree = function() { return toDegree(longitude, precision); };
+	this.latitudeDecimal = function() { return toDecimal(latitude, precision); };
+	this.longitudeDecimal = function() { return toDecimal(longitude, precision); };
+	this.degreeText = function() { return degreeText(latitude, longitude, precision); };
+	this.decimalText = function() { return decimalText(latitude, longitude, precision); };
 };
 
-location.precisionText = function( acc ) {
-	if (Math.abs(acc-1) < 0.0000001) {
-		text = location.settings.precisiontexts.degree;
-	} else if (Math.abs(acc-1/60) < 0.0000001) {
-		text = location.settings.precisiontexts.minute;
-	} else if (Math.abs(acc-1/3600) < 0.0000001) {
-		text = location.settings.precisiontexts.second;
-	} else if (Math.abs(acc-1/36000) < 0.0000001) {
-		text = location.settings.precisiontexts.decisecond;
-	} else if (Math.abs(acc-1/360000) < 0.0000001) {
-		text = location.settings.precisiontexts.centisecond;
-	} else if (Math.abs(acc-1/3600000) < 0.0000001) {
-		text = location.settings.precisiontexts.milisecond;
-	} else if (acc == 0) {
-		text = location.settings.precisiontexts.maximal;
+var precisionText = function( precision ) {
+	if (Math.abs(precision-1) < 0.0000001) {
+		text = coordinate.settings.precisiontexts.degree;
+	} else if (Math.abs(precision-1/60) < 0.0000001) {
+		text = coordinate.settings.precisiontexts.minute;
+	} else if (Math.abs(precision-1/3600) < 0.0000001) {
+		text = coordinate.settings.precisiontexts.second;
+	} else if (Math.abs(precision-1/36000) < 0.0000001) {
+		text = coordinate.settings.precisiontexts.decisecond;
+	} else if (Math.abs(precision-1/360000) < 0.0000001) {
+		text = coordinate.settings.precisiontexts.centisecond;
+	} else if (Math.abs(precision-1/3600000) < 0.0000001) {
+		text = coordinate.settings.precisiontexts.milisecond;
+	} else if (precision == 0) {
+		text = coordinate.settings.precisiontexts.maximal;
 	} else {
-		if (acc < 9e-10) acc = 1e-9;
-		text = '&plusmn;' + acc + location.settings.degree;
+		if (precision < 9e-10) precision = 1e-9;
+		text = '&plusmn;' + precision + coordinate.settings.degree;
 	}
 	return text;
 };
 
-location.precisionOnEarthInMetric = function( acc ) {
-	var km = 40000 / 360 * acc;
+var precisionTextEarth = function( precision ) {
+	var km = 40000 / 360 * precision;
 	if (km > 100) return Math.round(km/100)*100 + " km";
 	if (km > 10) return Math.round(km/10)*10 + " km";
 	if (km > 1) return Math.round(km) + " km";
@@ -860,18 +869,18 @@ location.precisionOnEarthInMetric = function( acc ) {
 	return "1 mm";
 }
 
-location.toDecimal = function(value, precision) {
+var toDecimal = function(value, precision) {
 	if (typeof value === 'number') value = { 'internal' : value };
 	var val = Math.abs(value.internal);
-	var logacc = Math.floor(Math.log(precision) / Math.LN10);
-	if (logacc < -9) logacc = -9;
-	value.decimal = Math.round(val*Math.pow(10, -1 * logacc))/Math.pow(10, -1 * logacc);
+	var logprecision = Math.floor(Math.log(precision) / Math.LN10);
+	if (logprecision < -9) logprecision = -9;
+	value.decimal = Math.round(val*Math.pow(10, -1 * logprecision))/Math.pow(10, -1 * logprecision);
 	var dir = value.direction ? ' ' + value.direction : '';
-	value.decimaltext = value.decimal + location.settings.degree + dir;
+	value.decimaltext = value.decimal + coordinate.settings.degree + dir;
 	return value;
 };
 
-location.toDegree = function(value, precision) {
+var toDegree = function(value, precision) {
 	if (typeof value === 'number') value = { 'internal' : value };
 	var val = Math.abs(value.internal);
 	value.degree = Math.floor(val+0.00000001);
@@ -898,16 +907,16 @@ location.toDegree = function(value, precision) {
 		else return number + sign;
 	}
 	var dir = value.direction ? ' ' + value.direction : '';
-	value.degreetext = text(value.degree, location.settings.degree)
-		+ text(value.minute, location.settings.minute)
-		+ text(value.second, location.settings.second)
+	value.degreetext = text(value.degree, coordinate.settings.degree)
+		+ text(value.minute, coordinate.settings.minute)
+		+ text(value.second, coordinate.settings.second)
 		+ dir;
 	return value;
 };
 
 var precisionlevels = [10, 1, 0.1, 1/60, 0.01, 1/3600, 0.001, 1/36000, 0.0001, 1/360000, 0.00001, 1/3600000, 0.000001];
 
-location.increasePrecision = function(precision) {
+var increasePrecision = function(precision) {
 	var index = precisionlevels.indexOf(precision);
 	if ((index == precisionlevels.length-1) || (index < 0)) {
 		var retval = precision/10;
@@ -917,7 +926,7 @@ location.increasePrecision = function(precision) {
 	return precisionlevels[index+1];
 };
 
-location.decreasePrecision = function(precision) {
+coordinate.decreasePrecision = function(precision) {
 	if (precision == 0) return 1e-9;
 	var index = precisionlevels.indexOf(precision);
 	if (index == 0) return 180;
