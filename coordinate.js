@@ -786,15 +786,14 @@ var peggeoparser = (function(){
   return result;
 })();
 
-coordinate.Coordinate = function( inputtext, precision ) {
-	var inputprecision = precision;
-	
+coordinate.Coordinate = function( inputtext, inputprecision ) {
+
 	this.getInputtext = function() { return inputtext; };
 	
 	var result = [0, 0, 0];
 
 	try {
-		result = peggeoparser.parse(data.input);
+		result = peggeoparser.parse( inputtext );
 	} catch (err) {
 		result = [0, 0, 0];
 		this.error = err.toString();
@@ -805,18 +804,18 @@ coordinate.Coordinate = function( inputtext, precision ) {
 	this.latitudeInternal = function() { return latitude; }
 	this.longitudeInternal = function() { return longitude; }
 	
-	if (precision == undefined) {
-		precision = result[2];
-	}
+	var precision = (inputprecision === undefined)? result[2] : inputprecision;
 	this.precisionInternal = function() { return precision; }
 	this.precisionText = function() { return precisionText(precision); };
 	this.precisionTextEarth = function() { return precisionTextEarth(precision); };
 	
 	this.increasePrecision = function() {
 		precision = increasePrecision(precision);
+		return precision;
 	};
 	this.decreasePrecision = function() {
 		precision = decreasePrecision(precision);
+		return precision;
 	};
 	
 	this.northsouth = function() { return (latitude < 0) ? coordinate.settings.south : coordinate.settings.north; };
@@ -869,49 +868,63 @@ var precisionTextEarth = function( precision ) {
 	return "1 mm";
 }
 
-var toDecimal = function(value, precision) {
-	if (typeof value === 'number') value = { 'internal' : value };
-	var val = Math.abs(value.internal);
-	var logprecision = Math.floor(Math.log(precision) / Math.LN10);
-	if (logprecision < -9) logprecision = -9;
-	value.decimal = Math.round(val*Math.pow(10, -1 * logprecision))/Math.pow(10, -1 * logprecision);
-	var dir = value.direction ? ' ' + value.direction : '';
-	value.decimaltext = value.decimal + coordinate.settings.degree + dir;
-	return value;
+var decimalText = function( latitude, longitude, precision ) {
+	return '' + 
+		Math.abs(toDecimal(latitude, precision)) +
+		coordinate.settings.degree + ' ' +
+		((latitude < 0) ? coordinate.settings.south : coordinate.settings.north) +
+		coordinate.settings.latlongcombinator +
+		Math.abs(toDecimal(longitude, precision)) +
+		coordinate.settings.degree + ' ' +
+		((longitude < 0) ? coordinate.settings.west : coordinate.settings.east);
 };
 
-var toDegree = function(value, precision) {
-	if (typeof value === 'number') value = { 'internal' : value };
-	var val = Math.abs(value.internal);
-	value.degree = Math.floor(val+0.00000001);
-	if (precision > 0.9999999999) {
-		value.minute = undefined;
-	} else {
-		value.minute = Math.floor((val-value.degree+0.000001)*60);
-	}
-	if (precision > (0.9999999999/60)) {
-		value.second = undefined;
-	} else {
-		value.second = (val-value.degree-value.minute/60)*3600;
-		if (precision > (0.9999999999/3600))
-			value.second = Math.round(value.second);
-		else if (precision > (0.9999999999/36000))
-			value.second = Math.round(value.second*10)/10;
-		else if (precision > (0.9999999999/360000))
-			value.second = Math.round(value.second*100)/100;
-		else
-			value.second = Math.round(value.second*1000)/1000;
-	}
+var toDecimal = function(value, precision) {
+	var logprecision = Math.max(-9, Math.floor(Math.log(precision) / Math.LN10));
+	return decimal = Math.round(value*Math.pow(10, -1 * logprecision))/Math.pow(10, -1 * logprecision);
+};
+
+var degreeText = function( latitude, longitude, precision ) {
 	var text = function(number, sign) {
 		if (number == undefined) return '';
 		else return number + sign;
 	}
-	var dir = value.direction ? ' ' + value.direction : '';
-	value.degreetext = text(value.degree, coordinate.settings.degree)
-		+ text(value.minute, coordinate.settings.minute)
-		+ text(value.second, coordinate.settings.second)
-		+ dir;
-	return value;
+	var latdeg = toDegree( latitude, precision );
+	var longdeg = toDegree( longitude, precision );
+	return  '' +
+		text(Math.abs(latdeg.degree), coordinate.settings.degree) +
+		text(latdeg.minute, coordinate.settings.minute) +
+		text(latdeg.second, coordinate.settings.second) +
+		((latitude < 0) ? coordinate.settings.south : coordinate.settings.north) +
+		coordinate.settings.latlongcombinator +
+		text(Math.abs(longdeg.degree), coordinate.settings.degree) +
+		text(longdeg.minute, coordinate.settings.minute) +
+		text(longdeg.second, coordinate.settings.second) +
+		((longitude < 0) ? coordinate.settings.west : coordinate.settings.east);
+};
+
+var toDegree = function(value, precision) {
+	var result = {};
+	result.degree = Math.floor(value+0.00000001);
+	if (precision > 0.9999999999) {
+		result.minute = undefined;
+	} else {
+		result.minute = Math.abs(Math.floor((value-result.degree+0.000001)*60));
+	}
+	if (precision > (0.9999999999/60)) {
+		result.second = undefined;
+	} else {
+		result.second = (value-result.degree-result.minute/60)*3600;
+		if (precision > (0.9999999999/3600))
+			result.second = Math.abs(Math.round(result.second));
+		else if (precision > (0.9999999999/36000))
+			result.second = Math.abs(Math.round(result.second*10)/10);
+		else if (precision > (0.9999999999/360000))
+			result.second = Math.abs(Math.round(result.second*100)/100);
+		else
+			result.second = Math.abs(Math.round(result.second*1000)/1000);
+	}
+	return result;
 };
 
 var precisionlevels = [10, 1, 0.1, 1/60, 0.01, 1/3600, 0.001, 1/36000, 0.0001, 1/360000, 0.00001, 1/3600000, 0.000001];
@@ -926,12 +939,21 @@ var increasePrecision = function(precision) {
 	return precisionlevels[index+1];
 };
 
-coordinate.decreasePrecision = function(precision) {
+var decreasePrecision = function(precision) {
 	if (precision == 0) return 1e-9;
 	var index = precisionlevels.indexOf(precision);
 	if (index == 0) return 180;
 	if (index < 0) return Math.min(precision*10, 180);
 	return precisionlevels[index-1];
 };
+
+coordinate.decimalText = decimalText;
+coordinate.degreeText = degreeText;
+coordinate.toDecimal = toDecimal;
+coordinate.toDegree = toDegree;
+coordinate.increasePrecision = increasePrecision;
+coordinate.decreasePrecision = decreasePrecision;
+coordinate.precisionText = precisionText;
+coordinate.precisionTextEarth = precisionTextEarth;
 
 })(window);

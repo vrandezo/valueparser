@@ -39,10 +39,12 @@ $(document).ready(function() {
 		update();
 	});
 	$('#precinc').bind('click', function() {
+		if (precision === undefined) precision = precisionreturned;
 		precision = result.increasePrecision();
 		update();
 	});
 	$('#precdec').bind('click', function() {
+		if (precision === undefined) precision = precisionreturned;
 		precision = result.decreasePrecision();
 		update();
 	});
