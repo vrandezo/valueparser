@@ -1,7 +1,7 @@
 start
   =
-    ' '* latitude:val ' '* north:'N'i? south:'S'i? [, ]* longitude:val ' '* east:'E'i? west:'W'i? ' '* 
-    { 
+    ' '* latitude:val ' '* north:'N'i? south:'S'i? [, ]* longitude:val ' '* east:'E'i? west:'W'i? ' '*
+    {
       var lat = (south!='')? latitude[0] * -1 : latitude[0];
       var lon = (west!='')? longitude[0] * -1 : longitude[0];
       var acc = Math.min(latitude[1], longitude[1]);
@@ -9,9 +9,9 @@ start
     }
 
 val
-  = 
+  =
     sign:[+-]?  full:integer '°'? ' '* min:integer dotsec:'\''? ' '* sec:integer postdot:postdot [\'\"]* '°'?
-    { 
+    {
       var r = full + min/60 + sec/3600;
       var acc = 1;
       if (min>0) acc=1/60;
@@ -28,9 +28,9 @@ val
     }
 
 postdot
-  = 
+  =
     dot:'\.'? digits:[0-9]*
-    { 
+    {
       if (dot=='') return [0, 0];
       var t = '.' + digits.join('').toString();
       var r = parseFloat(t, 10);
