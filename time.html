@@ -30,7 +30,6 @@ $(document).ready(function() {
 			$('#calchange').hide();
 		}
 
-		$('#all').text(JSON.stringify({}, null, 2));
 		var safe = {
 			'time' : result.iso8601(),
 			'precision' : result.precision(),
@@ -66,6 +65,50 @@ $(document).ready(function() {
 	$('#calchange').hide();
 	$('#in').bind('input', update);
 	$('#details').hide();
+	
+	$('#runtests').bind('click', function() {
+		var tests = [
+			{
+				'input' : '45 BC',
+				'time' : '-00000000044-01-01T00:00:00Z'
+			},
+			{
+				'input' : '12 October 1492',
+				'time' : '+00000001492-10-21T00:00:00Z'
+			},
+			{
+				'input' : 'March 45 BC',
+				'time' : '-00000000044-03-01T00:00:00Z'
+			},
+			{
+				'input' : 'April 23, 1616 Old Style',
+				'time' : '+00000001616-05-03T00:00:00Z'
+			},
+			{
+				'input' : '22.4.1616 Gregorian',
+				'time' : '+00000001616-04-22T00:00:00Z'
+			},
+			{
+				'input' : '2001-01-01',
+				'time' : '+00000002001-01-01T00:00:00Z'
+			},
+			{
+				'input' : 'November 20, 1989',
+				'time' : '+00000001989-11-20T00:00:00Z'
+			},
+		];
+		$('#tests').html('<table id="testresults">'
+			+ '<tr><th>Input</th><th>Expected</th><th>Returned</th></table>');
+		$.each(tests, function(index, test) {
+			var t = new time.Time(test.input);
+			var passed = (t.iso8601() === test.time);
+			
+			var bgcolor = passed ? '9f9' : 'f33';
+			$('#testresults').append('<tr>'
+			    + '<td style="background-color:#' + bgcolor + '">' + test.input + '</td>' 
+				+ '<td>' + test.time + '</td><td>' + t.iso8601() + '</td></tr>');
+		});
+	});
 });
   </script>
   <style>
@@ -81,7 +124,6 @@ $(document).ready(function() {
 		width: 600px;
 	}
 	.left {
-		float : left;
 		width : 620px;
 	}
 	.right {
@@ -99,8 +141,8 @@ $(document).ready(function() {
  </head>
  <body>
   <div class="right">
-   <pre id="all">For the JSON structure see also in your
-   JS console the variable &quot;result&quot;</pre>
+   <pre id="all">Explore the the object &quot;result&quot;
+in your console.</pre>
    <br>
    Send to the backend to be saved:
    <pre id="save">{}</pre>
@@ -142,12 +184,16 @@ $(document).ready(function() {
       <a href="http://en.wikipedia.org/wiki/Julian_day">Julian Day Number</a>: <span id="jdn"> </span>
      </div>
     </form>
+  </div>
+  
+     <br>
+     <span id="runtests" class="action" style="column-break-before:always">[run tests]</span>
+     <div id="tests"></div>
      <br>
      &nbsp;
      <br>
     <p>
     The code is available on <a href="https://github.com/vrandezo/valueparser">Github</a>.</p<
     </p>
-  </div>
  </body>
 </html>

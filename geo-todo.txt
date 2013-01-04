@@ -7,3 +7,8 @@ do not allow precision beyond thousandth degree
 do not allow precision beyond 1e-9
 do not allow degrees beyond 90 resp 180
 *catch syntax error exception
+
+no values beyond 180 and 90 degrees
+
+accept also N 48° 22.250 E 010° 53.777
+

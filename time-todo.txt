@@ -5,4 +5,5 @@ make timeparser an object
 * make settings objectible
 * make a few things settable
 
-maybe nothing should be well defined instead and lead to today? (but only explicitly nothing, not if the parse fails)
+EDTF export http://www.loc.gov/standards/datetime/
+
