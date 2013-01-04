@@ -59,14 +59,14 @@ $(document).ready(function() {
 		);
 	};
 	
-    var map = new OpenLayers.Map('map');
-    var layer = new OpenLayers.Layer.OSM( 'Simple OSM Map', undefined,
-    	{'attribution': 'Map data by <a href="http://openstreetmap.org">OpenStreetMap</a>'} );
-    map.addLayer(layer);
-    center(0, 0, 2);
-
-    OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {                
-    	defaultHandlerOptions: {
+	var map = new OpenLayers.Map('map');
+	var layer = new OpenLayers.Layer.OSM( 'Simple OSM Map', undefined,
+		{'attribution': 'Map data by <a href="http://openstreetmap.org">OpenStreetMap</a>'} );
+	map.addLayer(layer);
+	center(0, 0, 2);
+	
+	OpenLayers.Control.Click = OpenLayers.Class(OpenLayers.Control, {                
+		defaultHandlerOptions: {
 			'single': true,
 			'double': false,
 			'pixelTolerance': 0,
@@ -77,7 +77,7 @@ $(document).ready(function() {
 			this.handlerOptions = OpenLayers.Util.extend({}, this.defaultHandlerOptions);
 			OpenLayers.Control.prototype.initialize.apply( this, arguments ); 
 			this.handler = new OpenLayers.Handler.Click( this, { 'click': this.trigger }, this.handlerOptions );
-        }, 
+		}, 
 		trigger: function(e) {
         	var lonlat = map.getLonLatFromPixel(e.xy);
         	lonlat.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
