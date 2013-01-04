@@ -1,3 +1,4 @@
 explicitly entered 00 minutes are ignored for autoprecision
-catch syntax error exception
 accept also N 48° 22.250 E 010° 53.777
+report errors
+make settings OO

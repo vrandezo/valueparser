@@ -1,6 +1,6 @@
 hours and higher detail
 time intervals (not as intervals though)
-make settings objectible
+make settings OO
 make a few things settable
+report errors
 EDTF export http://www.loc.gov/standards/datetime/
-

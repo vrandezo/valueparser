@@ -9,57 +9,111 @@ time.noConflict = function() {
 	return time;
 };
 
-time.settings = {};
-time.settings.bce = ['BCE', 'BC', 'B.C.', 'before Common Era', 'before Christ'];
-time.settings.ace = ['CE', 'AD', 'A.D.', 'Anno Domini', 'Common Era'];
-time.settings.pasttext = '% ago';
-time.settings.futuretext = 'in %';
-time.settings.calendarnames = [];
-time.settings.calendarnames[0] = ['Gregorian', 'G', 'GD', 'GC', 'NS', 'N.S.', 'New Style', 'Gregorian calendar', 'Gregorian date'];
-time.settings.calendarnames[1] = ['Julian', 'J', 'JD', 'JC', 'OS', 'O.S.', 'Old Style', 'Julian calendar', 'Julian date'];
-time.settings.monthnames = [];
-time.settings.monthnames[0]  = ['January', 'Jan'];
-time.settings.monthnames[1]  = ['February', 'Feb'];
-time.settings.monthnames[2]  = ['March', 'Mar'];
-time.settings.monthnames[3]  = ['April', 'Apr'];
-time.settings.monthnames[4]  = ['May'];
-time.settings.monthnames[5]  = ['June', 'Jun'];
-time.settings.monthnames[6]  = ['July', 'Jul'],
-time.settings.monthnames[7]  = ['August', 'Aug'];
-time.settings.monthnames[8]  = ['September', 'Sep'];
-time.settings.monthnames[9]  = ['October', 'Oct'];
-time.settings.monthnames[10] = ['November', 'Nov'];
-time.settings.monthnames[11] = ['December', 'Dec'];
-time.settings.precisiontexts = {};
-time.settings.precisiontexts[0]  = 'billion years';
-time.settings.precisiontexts[1]  = 'hundred million years';
-time.settings.precisiontexts[2]  = 'ten million years';
-time.settings.precisiontexts[3]  = 'million years';
-time.settings.precisiontexts[4]  = '100,000 years';
-time.settings.precisiontexts[5]  = '10,000 years';
-time.settings.precisiontexts[6]  = 'millenium';
-time.settings.precisiontexts[7]  = 'century';
-time.settings.precisiontexts[8]  = 'decade';
-time.settings.precisiontexts[9]  = 'year';
-time.settings.precisiontexts[10] = 'month';
-time.settings.precisiontexts[11] = 'day';
-time.settings.precisiontexts[12] = 'hour';
-time.settings.precisiontexts[13] = 'minute';
-time.settings.precisiontexts[14] = 'second';
-time.settings.outputprecision = {};
-time.settings.outputprecision[0] = '% billion years';
-time.settings.outputprecision[1] = '%00 million years';
-time.settings.outputprecision[2] = '%0 million years';
-time.settings.outputprecision[3] = '% million years';
-time.settings.outputprecision[4] = '%00,000 years';
-time.settings.outputprecision[5] = '%0,000 years';
-time.settings.outputprecision[6] = '%. millenium';
-time.settings.outputprecision[7] = '%. century';
-time.settings.outputprecision[8] = '%0s';
+var settings = {};
 
-time.maxPrecision = function() { return 14; };
+settings.bce = ['BCE', 'BC', 'B.C.', 'before Common Era', 'before Christ'];
+settings.ace = ['CE', 'AD', 'A.D.', 'Anno Domini', 'Common Era'];
+settings.pasttext = '% ago';
+settings.futuretext = 'in %';
+settings.calendarnames = [];
+settings.calendarnames[0] = ['Gregorian', 'G', 'GD', 'GC', 'NS', 'N.S.', 'New Style', 'Gregorian calendar', 'Gregorian date'];
+settings.calendarnames[1] = ['Julian', 'J', 'JD', 'JC', 'OS', 'O.S.', 'Old Style', 'Julian calendar', 'Julian date'];
+settings.monthnames = [];
+settings.monthnames[0]  = ['January', 'Jan'];
+settings.monthnames[1]  = ['February', 'Feb'];
+settings.monthnames[2]  = ['March', 'Mar'];
+settings.monthnames[3]  = ['April', 'Apr'];
+settings.monthnames[4]  = ['May'];
+settings.monthnames[5]  = ['June', 'Jun'];
+settings.monthnames[6]  = ['July', 'Jul'],
+settings.monthnames[7]  = ['August', 'Aug'];
+settings.monthnames[8]  = ['September', 'Sep'];
+settings.monthnames[9]  = ['October', 'Oct'];
+settings.monthnames[10] = ['November', 'Nov'];
+settings.monthnames[11] = ['December', 'Dec'];
+settings.precisiontexts = [];
+settings.precisiontexts[0]  = 'billion years';
+settings.precisiontexts[1]  = 'hundred million years';
+settings.precisiontexts[2]  = 'ten million years';
+settings.precisiontexts[3]  = 'million years';
+settings.precisiontexts[4]  = '100,000 years';
+settings.precisiontexts[5]  = '10,000 years';
+settings.precisiontexts[6]  = 'millenium';
+settings.precisiontexts[7]  = 'century';
+settings.precisiontexts[8]  = 'decade';
+settings.precisiontexts[9]  = 'year';
+settings.precisiontexts[10] = 'month';
+settings.precisiontexts[11] = 'day';
+settings.precisiontexts[12] = 'hour';
+settings.precisiontexts[13] = 'minute';
+settings.precisiontexts[14] = 'second';
+settings.outputprecision = [];
+settings.outputprecision[0] = '% billion years';
+settings.outputprecision[1] = '%00 million years';
+settings.outputprecision[2] = '%0 million years';
+settings.outputprecision[3] = '% million years';
+settings.outputprecision[4] = '%00,000 years';
+settings.outputprecision[5] = '%0,000 years';
+settings.outputprecision[6] = '%. millenium';
+settings.outputprecision[7] = '%. century';
+settings.outputprecision[8] = '%0s';
 
-var pad = function(number,digits) { return (1e12 + Math.abs(number) + '').slice(-digits); }
+var maxPrecision = function() { return 14; };
+
+var isSane = function( text ) {
+	if (text.indexOf('<') > -1) return false;
+	if (text.indexOf('>') > -1) return false;
+	return true;
+};
+
+var settingArray = function( name, texts ) {
+	if (texts === undefined) return settings[name].slice(0);
+	if (!Array.isArray(texts)) throw 'Parameter to set should be an array of strings';
+	if (texts.length === 0) throw 'Parameter to set should be an array of strings';
+	for (var i=0; i<texts.length; i++) {
+		if (typeof texts[i] !== 'string') throw 'Parameter to set should be an array of strings';
+		if (!isSane(texts[i])) throw 'String ' + texts[i] + ' is not considered sane';
+	}
+	settings[name] = texts.slice(0);
+	return settings[name].slice(0);
+};
+var bce = function( texts ) { return settingArray( 'bce', texts ); };
+var ace = function( texts ) { return settingArray( 'ace', texts ); };
+var precisionTexts = function( texts ) {
+	if (texts.length !== 1+maxPrecision()) throw 'Incorrect number of strings';
+	return settingArray( 'precisiontexts', texts );
+};
+var outputPrecision = function( texts ) {
+	if (texts.length !== settins.outputprecision.length) throw 'Incorrect number of strings';
+	return settingArray( 'outputprecision', texts );
+};
+
+var settingText = function( name, text) {
+	if (text === undefined) return settings[name];
+	if (typeof text !== 'string') throw 'Parameter to set should be a string';
+	if (!isSane(text)) throw 'String ' + text + ' is not considered sane';
+	settings[name] = text;
+	return settings[name];
+};
+var pastText = function( texts ) { return settingArray( 'pasttext', texts ); };
+var futureText = function( texts ) { return settingArray( 'futuretext', texts ); };
+
+var settingArrayOfArrays = function( name, index, maxindex, texts ) {
+	if (!((index >= 0) && (index <= maxindex))) throw 'Index out of range';
+	if (texts === undefined) return settings[name][index].slice(0);
+	if (!Array.isArray(texts)) throw 'Parameter to set should be an array of strings';
+	if (texts.length === 0) throw 'Parameter to set should be an array of strings';
+	for (var i=0; i<texts.length; i++) {
+		if (typeof texts[i] !== 'string') throw 'Parameter to set should be an array of strings';
+		if (!isSane(texts[i])) throw 'String ' + texts[i] + ' is not considered sane';
+	}
+	settings[name][index] = texts.slice(0);
+	return settings[name][index].slice(0);
+};
+var calendarNames = function( index, texts ) { return settingArrayOfArrays( 'calendarnames', index, 1, texts); };
+var monthNames = function( index, texts ) { return settingArrayOfArrays( 'monthnames', index, 11, texts); };
+
+var pad = function(number,digits) { return (1e12 + Math.abs(number) + '').slice(-digits); };
 
 var Time = function( inputtext, precision ) {
 	var inputprecision = precision;
@@ -206,9 +260,9 @@ var gregorianToJulian = function(year, month, day) {
 };
 
 var readAsMonth = function(word) {
-	for(var i=0; i<time.settings.monthnames.length; i++) {
-		for(var j=0; j<time.settings.monthnames[i].length; j++) {
-			if (time.settings.monthnames[i][j].toLowerCase() === word.toLowerCase()) {
+	for(var i=0; i<settings.monthnames.length; i++) {
+		for(var j=0; j<settings.monthnames[i].length; j++) {
+			if (settings.monthnames[i][j].toLowerCase() === word.toLowerCase()) {
 				return i+1;
 			}
 		}
@@ -217,13 +271,13 @@ var readAsMonth = function(word) {
 };
 
 var readAsBCE = function(word) {
-	for(var i=0; i<time.settings.bce.length; i++) {
-		if (time.settings.bce[i].toLowerCase() === word.toLowerCase()) {
+	for(var i=0; i<settings.bce.length; i++) {
+		if (settings.bce[i].toLowerCase() === word.toLowerCase()) {
 			return true;
 		}
 	}
-	for(var i=0; i<time.settings.ace.length; i++) {
-		if (time.settings.ace[i].toLowerCase() === word.toLowerCase()) {
+	for(var i=0; i<settings.ace.length; i++) {
+		if (settings.ace[i].toLowerCase() === word.toLowerCase()) {
 			return false;
 		}
 	}
@@ -231,10 +285,10 @@ var readAsBCE = function(word) {
 };
 
 var readAsCalendar = function(word) {
-	for (var i=0; i<time.settings.calendarnames.length; i++) {
-		for (var j=0; j<time.settings.calendarnames[i].length; j++) {
-			if (time.settings.calendarnames[i][j].toLowerCase() === word.toLowerCase()) {
-				return time.settings.calendarnames[i][0];
+	for (var i=0; i<settings.calendarnames.length; i++) {
+		for (var j=0; j<settings.calendarnames[i].length; j++) {
+			if (settings.calendarnames[i][j].toLowerCase() === word.toLowerCase()) {
+				return settings.calendarnames[i][0];
 			}
 		}
 	}
@@ -422,16 +476,16 @@ var parse = function(text) {
 
 var writeApproximateYear = function(year, precision) {
 	var significant = Math.floor((Math.abs(year)-1)/Math.pow(10, 9-precision))+1;
-	var text = time.settings.outputprecision[precision].replace('%', significant);
+	var text = settings.outputprecision[precision].replace('%', significant);
 	if (precision < 6) {
 		if (year < 0) {
-			text = time.settings.pasttext.replace('%', text);
+			text = settings.pasttext.replace('%', text);
 		} else {
-			text = time.settings.futuretext.replace('%', text);
+			text = settings.futuretext.replace('%', text);
 		}
 	} else {
 		if (year < 1) {
-			text += ' ' + time.settings.bce[0];
+			text += ' ' + settings.bce[0];
 		}
 	}
 	return text;
@@ -439,20 +493,20 @@ var writeApproximateYear = function(year, precision) {
 
 var writeYear = function(year) {
 	if (year < 0) {
-		return -1*(year-1) + ' ' + time.settings.bce[0];
+		return -1*(year-1) + ' ' + settings.bce[0];
 	} 
 	if (year === 0) {
-		return '1 ' + time.settings.bce[0];
+		return '1 ' + settings.bce[0];
 	} 
 	return year;
 };
 
 var writeMonth = function(year, month) {
-	return time.settings.monthnames[month-1][0] + ' ' + writeYear(year);
+	return settings.monthnames[month-1][0] + ' ' + writeYear(year);
 };
 
 var writeDay = function(year, month, day) {
-	return time.settings.monthnames[month-1][0] + ' ' + day + ', ' + writeYear(year);
+	return settings.monthnames[month-1][0] + ' ' + day + ', ' + writeYear(year);
 };
 
 var getTextFromDate = function(precision, year, month, day) {
@@ -468,8 +522,8 @@ var getTextFromDate = function(precision, year, month, day) {
 };
 
 var precisionText = function( acc ) {
-	if ((acc > time.maxPrecision()) || (acc < 0)) return undefined;
-	return time.settings.precisiontexts[acc];
+	if ((acc > maxPrecision()) || (acc < 0)) return undefined;
+	return settings.precisiontexts[acc];
 };
 
 time.Time = Time;
@@ -487,5 +541,16 @@ time.writeMonth = writeMonth;
 time.writeDay = writeDay;
 time.getTextFromDate = getTextFromDate;
 time.precisionText = precisionText;
+time.maxPrecision = maxPrecision;
+
+time.settings = {};
+time.settings.bce = bce;
+time.settings.ace = ace;
+time.settings.pastText = pastText;
+time.settings.futureText = futureText;
+time.settings.calendarNames = calendarNames;
+time.settings.monthNames = monthNames;
+time.settings.precisionTexts = precisionTexts;
+time.settings.outputPrecision = outputPrecision;
 
 })(window);
