@@ -799,6 +799,8 @@ coordinate.Coordinate = function( inputtext, inputprecision ) {
 		this.error = err.toString();
 	}
 
+	if (Math.abs(result[0] > 90)) result = [0, 0, 0];
+	if (Math.abs(result[1] > 180)) result = [0, 0, 0];
 	var latitude = result[0];
 	var longitude = result[1];
 	this.latitudeInternal = function() { return latitude; }
