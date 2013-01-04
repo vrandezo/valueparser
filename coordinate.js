@@ -9,24 +9,57 @@ coordinate.noConflict = function() {
 	return coordinate;
 };
 
-coordinate.settings = {};
-coordinate.settings.north = 'N';
-coordinate.settings.east = 'E';
-coordinate.settings.south = 'S';
-coordinate.settings.west = 'W';
-coordinate.settings.dot = '.';
-coordinate.settings.latlongcombinator = ', ';
-coordinate.settings.degree = '°';
-coordinate.settings.minute = '\'';
-coordinate.settings.second = '"';
-coordinate.settings.precisiontexts = {};
-coordinate.settings.precisiontexts.degree = 'to a degree';
-coordinate.settings.precisiontexts.minute = 'to an arcminute';
-coordinate.settings.precisiontexts.second = 'to an arcsecond';
-coordinate.settings.precisiontexts.decisecond = 'to a tenth of an arcsecond';
-coordinate.settings.precisiontexts.centisecond = 'to the hundredth of an arcsecond';
-coordinate.settings.precisiontexts.milisecond = 'to the thousandth of an arcsecond';
-coordinate.settings.precisiontexts.maximal = 'maximal';
+var settings = {};
+settings.north = 'N';
+settings.east = 'E';
+settings.south = 'S';
+settings.west = 'W';
+settings.dot = '.';
+settings.latlongcombinator = ', ';
+settings.degree = '°';
+settings.minute = '\'';
+settings.second = '"';
+settings.precisiontextsdegree = 'to a degree';
+settings.precisiontextsminute = 'to an arcminute';
+settings.precisiontextssecond = 'to an arcsecond';
+settings.precisiontextsdecisecond = 'to a tenth of an arcsecond';
+settings.precisiontextscentisecond = 'to the hundredth of an arcsecond';
+settings.precisiontextsmilisecond = 'to the thousandth of an arcsecond';
+settings.precisiontextsmaximal = 'maximal';
+
+var isSane = function( text ) {
+	if (text.indexOf('<') > -1) return false;
+	if (text.indexOf('>') > -1) return false;
+	return true;
+};
+
+var settingText = function( name, text) {
+	if (text === undefined) return settings[name];
+	if (typeof text !== 'string') throw 'Parameter to set should be a string';
+	if (!isSane(text)) throw 'String ' + text + ' is not considered sane';
+	settings[name] = text;
+	return settings[name];
+};
+var s = {};
+s.north = function( texts ) { return settingText( 'north', texts ); };
+s.east = function( texts ) { return settingText( 'east', texts ); };
+s.south = function( texts ) { return settingText( 'south', texts ); };
+s.west = function( texts ) { return settingText( 'west', texts ); };
+s.dot = function( texts ) { return settingText( 'dot', texts ); };
+s.latlongcombinator = function( texts ) { return settingText( 'latlongcombinator', texts ); };
+s.degree = function( texts ) { return settingText( 'degree', texts ); };
+s.minute = function( texts ) { return settingText( 'minute', texts ); };
+s.second = function( texts ) { return settingText( 'second', texts ); };
+s.precisiontextsdegree = function( texts ) { return settingText( 'precisiontextsdegree', texts ); };
+s.precisiontextsminute = function( texts ) { return settingText( 'precisiontextsminute', texts ); };
+s.precisiontextssecond = function( texts ) { return settingText( 'precisiontextssecond', texts ); };
+s.precisiontextsdecisecond = function( texts ) { return settingText( 'precisiontextsdecisecond', texts ); };
+s.precisiontextscentisecond = function( texts ) { return settingText( 'precisiontextscentisecond', texts ); };
+s.precisiontextsmilisecond = function( texts ) { return settingText( 'precisiontextsmilisecond', texts ); };
+s.precisiontextsmaximal = function( texts ) { return settingText( 'precisiontextsmaximal', texts ); };
+
+s. = function( texts ) { return settingArray( 'pasttext', texts ); };
+var futureText = function( texts ) { return settingArray( 'futuretext', texts ); };
 
 var peggeoparser = (function(){
   /*
@@ -180,7 +213,7 @@ var peggeoparser = (function(){
               }
             }
             if (result2 !== null) {
-              if (input.substr(pos, 1).toUpperCase() === coordinate.settings.north) {
+              if (input.substr(pos, 1).toUpperCase() === settings.north) {
                 result3 = input.substr(pos, 1);
                 pos++;
               } else {
@@ -191,7 +224,7 @@ var peggeoparser = (function(){
               }
               result3 = result3 !== null ? result3 : "";
               if (result3 !== null) {
-                if (input.substr(pos, 1).toUpperCase() === coordinate.settings.south) {
+                if (input.substr(pos, 1).toUpperCase() === settings.south) {
                   result4 = input.substr(pos, 1);
                   pos++;
                 } else {
@@ -250,7 +283,7 @@ var peggeoparser = (function(){
                         }
                       }
                       if (result7 !== null) {
-                        if (input.substr(pos, 1).toUpperCase() === coordinate.settings.east) {
+                        if (input.substr(pos, 1).toUpperCase() === settings.east) {
                           result8 = input.substr(pos, 1);
                           pos++;
                         } else {
@@ -261,7 +294,7 @@ var peggeoparser = (function(){
                         }
                         result8 = result8 !== null ? result8 : "";
                         if (result8 !== null) {
-                          if (input.substr(pos, 1).toUpperCase() === coordinate.settings.west) {
+                          if (input.substr(pos, 1).toUpperCase() === settings.west) {
                             result9 = input.substr(pos, 1);
                             pos++;
                           } else {
@@ -820,8 +853,8 @@ coordinate.Coordinate = function( inputtext, inputprecision ) {
 		return precision;
 	};
 	
-	this.northsouth = function() { return (latitude < 0) ? coordinate.settings.south : coordinate.settings.north; };
-	this.eastwest = function() { return (longitude < 0) ? coordinate.settings.west : coordinate.settings.east; };
+	this.northsouth = function() { return (latitude < 0) ? settings.south : settings.north; };
+	this.eastwest = function() { return (longitude < 0) ? settings.west : settings.east; };
 
 	this.latitudeDegree = function() { return toDegree(latitude, precision); };
 	this.longitudeDegree = function() { return toDegree(longitude, precision); };
@@ -833,22 +866,22 @@ coordinate.Coordinate = function( inputtext, inputprecision ) {
 
 var precisionText = function( precision ) {
 	if (Math.abs(precision-1) < 0.0000001) {
-		text = coordinate.settings.precisiontexts.degree;
+		text = settings.precisiontextsdegree;
 	} else if (Math.abs(precision-1/60) < 0.0000001) {
-		text = coordinate.settings.precisiontexts.minute;
+		text = settings.precisiontextsminute;
 	} else if (Math.abs(precision-1/3600) < 0.0000001) {
-		text = coordinate.settings.precisiontexts.second;
+		text = settings.precisiontextssecond;
 	} else if (Math.abs(precision-1/36000) < 0.0000001) {
-		text = coordinate.settings.precisiontexts.decisecond;
+		text = settings.precisiontextsdecisecond;
 	} else if (Math.abs(precision-1/360000) < 0.0000001) {
-		text = coordinate.settings.precisiontexts.centisecond;
+		text = settings.precisiontextscentisecond;
 	} else if (Math.abs(precision-1/3600000) < 0.0000001) {
-		text = coordinate.settings.precisiontexts.milisecond;
+		text = settings.precisiontextsmilisecond;
 	} else if (precision == 0) {
-		text = coordinate.settings.precisiontexts.maximal;
+		text = settings.precisiontextsmaximal;
 	} else {
 		if (precision < 9e-10) precision = 1e-9;
-		text = '&plusmn;' + precision + coordinate.settings.degree;
+		text = '&plusmn;' + precision + settings.degree;
 	}
 	return text;
 };
@@ -873,12 +906,12 @@ var precisionTextEarth = function( precision ) {
 var decimalText = function( latitude, longitude, precision ) {
 	return '' + 
 		Math.abs(toDecimal(latitude, precision)) +
-		coordinate.settings.degree + ' ' +
-		((latitude < 0) ? coordinate.settings.south : coordinate.settings.north) +
-		coordinate.settings.latlongcombinator +
+		settings.degree + ' ' +
+		((latitude < 0) ? settings.south : settings.north) +
+		settings.latlongcombinator +
 		Math.abs(toDecimal(longitude, precision)) +
-		coordinate.settings.degree + ' ' +
-		((longitude < 0) ? coordinate.settings.west : coordinate.settings.east);
+		settings.degree + ' ' +
+		((longitude < 0) ? settings.west : settings.east);
 };
 
 var toDecimal = function(value, precision) {
@@ -894,15 +927,15 @@ var degreeText = function( latitude, longitude, precision ) {
 	var latdeg = toDegree( latitude, precision );
 	var longdeg = toDegree( longitude, precision );
 	return  '' +
-		text(Math.abs(latdeg.degree), coordinate.settings.degree) +
-		text(latdeg.minute, coordinate.settings.minute) +
-		text(latdeg.second, coordinate.settings.second) +
-		((latitude < 0) ? coordinate.settings.south : coordinate.settings.north) +
-		coordinate.settings.latlongcombinator +
-		text(Math.abs(longdeg.degree), coordinate.settings.degree) +
-		text(longdeg.minute, coordinate.settings.minute) +
-		text(longdeg.second, coordinate.settings.second) +
-		((longitude < 0) ? coordinate.settings.west : coordinate.settings.east);
+		text(Math.abs(latdeg.degree), settings.degree) +
+		text(latdeg.minute, settings.minute) +
+		text(latdeg.second, settings.second) +
+		((latitude < 0) ? settings.south : settings.north) +
+		settings.latlongcombinator +
+		text(Math.abs(longdeg.degree), settings.degree) +
+		text(longdeg.minute, settings.minute) +
+		text(longdeg.second, settings.second) +
+		((longitude < 0) ? settings.west : settings.east);
 };
 
 var toDegree = function(value, precision) {
@@ -957,5 +990,23 @@ coordinate.increasePrecision = increasePrecision;
 coordinate.decreasePrecision = decreasePrecision;
 coordinate.precisionText = precisionText;
 coordinate.precisionTextEarth = precisionTextEarth;
+
+coordinate.settings = {};
+coordinate.settings.north = s.north;
+coordinate.settings.east = s.east;
+coordinate.settings.south = s.south;
+coordinate.settings.west = s.west;
+coordinate.settings.dot = s.dot;
+coordinate.settings.latlongcombinator = s.latlongcombinator;
+coordinate.settings.degree = s.degree;
+coordinate.settings.minute = s.minute;
+coordinate.settings.second = s.second;
+coordinate.settings.precisiontextsdegree = s.precisiontextsdegree;
+coordinate.settings.precisiontextsminute = s.precisiontextsminute;
+coordinate.settings.precisiontextssecond = s.precisiontextssecond;
+coordinate.settings.precisiontextsdecisecond = s.precisiontextsdecisecond;
+coordinate.settings.precisiontextscentisecond = s.precisiontextscentisecond;
+coordinate.settings.precisiontextsmilisecond = s.precisiontextsmilisecond;
+coordinate.settings.precisiontextsmaximal = s.precisiontextsmaximal;
 
 })(window);

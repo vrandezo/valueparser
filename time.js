@@ -95,8 +95,8 @@ var settingText = function( name, text) {
 	settings[name] = text;
 	return settings[name];
 };
-var pastText = function( texts ) { return settingArray( 'pasttext', texts ); };
-var futureText = function( texts ) { return settingArray( 'futuretext', texts ); };
+var pastText = function( texts ) { return settingText( 'pasttext', texts ); };
+var futureText = function( texts ) { return settingText( 'futuretext', texts ); };
 
 var settingArrayOfArrays = function( name, index, maxindex, texts ) {
 	if (!((index >= 0) && (index <= maxindex))) throw 'Index out of range';
