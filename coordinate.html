@@ -24,7 +24,6 @@ $(document).ready(function() {
 
 		center(result.latitudeInternal(), result.longitudeInternal());
 
-		$('#all').text(JSON.stringify(result, null, 2));
 		var safe = {
 			'latitude' : result.latitudeInternal(),
 			'longitude' : result.longitudeInternal(),
@@ -84,14 +83,77 @@ $(document).ready(function() {
         	lonlat.transform(new OpenLayers.Projection("EPSG:900913"), new OpenLayers.Projection("EPSG:4326"));
         	var p = precision;
         	if (p == undefined ) p = 1/60;
-			var result = coordinate.parse(lonlat.lat + ' ' + lonlat.lon, p);
-			$('#in').val(result.degreetext);
+			var result = new coordinate.Coordinate(lonlat.lat + ' ' + lonlat.lon, p);
+			$('#in').val(result.degreeText());
 			update();
         }
 	});
     var click = new OpenLayers.Control.Click();
 	map.addControl(click);
     click.activate();
+
+	$('#runtests').bind('click', function() {
+		var tests = [
+			{
+				'input' : '52,13',
+				'latitude' : '52',
+				'longitude' : '13'
+			},
+			{
+				'input' : '52N 13E',
+				'latitude' : '52',
+				'longitude' : '13'
+			},
+			{
+				'input' : '52N 13W',
+				'latitude' : '52',
+				'longitude' : '-13'
+			},
+			{
+				'input' : '52°,-13',
+				'latitude' : '52',
+				'longitude' : '-13'
+			},
+			{
+				'input' : '52°30\',13',
+				'latitude' : '52.5',
+				'longitude' : '13'
+			},
+			{
+				'input' : '52°30\'S,13',
+				'latitude' : '-52.5',
+				'longitude' : '13'
+			},
+			{
+				'input' : '52.5 S 13°30 W',
+				'latitude' : '-52.5',
+				'longitude' : '-13.5'
+			},
+			{
+				'input' : '52°15\'23.2133" N 13°12\'23" E',
+				'latitude' : '52.256448138888885',
+				'longitude' : '13.206388888888888'
+			},
+			{
+				'input' : '52°N,13°E',
+				'latitude' : '52',
+				'longitude' : '13'
+			}
+		];
+		$('#tests').html('<table id="testresults">'
+			+ '<tr><th>Input</th><th>Expected Lat</th><th>Expected Long</th><th>Returned Lat</th><th>Returned long</th></table>');
+		$.each(tests, function(index, test) {
+			var c = new coordinate.Coordinate(test.input);
+			var passed = ((c.latitudeInternal() == test.latitude) && (c.longitudeInternal() == test.longitude));
+			
+			var bgcolor = passed ? '9f9' : 'f33';
+			$('#testresults').append('<tr>'
+			    + '<td style="background-color:#' + bgcolor + '">' + test.input + '</td>' 
+				+ '<td>' + test.latitude + '</td><td>' + test.longitude + '</td>'
+				+ '<td>' + c.latitudeInternal() + '</td><td>' + c.longitudeInternal() + '</td>'
+				+ '</tr>');
+		});
+	});
 });
   </script>
   <style>
@@ -112,7 +174,6 @@ $(document).ready(function() {
 		border: 1px solid #ccc;
 	}
 	.left {
-		float : left;
 		width : 620px;
 	}
 	.right {
@@ -126,12 +187,19 @@ $(document).ready(function() {
 		left: 297px;
 		pointer-events:none;
 	}
+	.action {
+		font-size  : 60%;
+		color : blue;
+	}
+	a {
+		text-decoration : none;
+	}
   </style>
  </head>
  <body>
   <div class="right">
-   <pre id="all">For the JSON structure see also in your
-   JS console the variable &quot;result&quot;</pre>
+   <pre id="all">Explore the object &quot;result&quot;
+in your console.</pre>
    <br>
    Send to the backend to be saved:
    <pre id="save">{}</pre>
@@ -148,15 +216,17 @@ $(document).ready(function() {
      <span id="dec">0°N, 0°E</span>
      <br>
      Precision: <span id="prec">to the degree</span>/<span id="precm">...</span>
-     <span style="font-size:60%">
-      <span id="precinc">[increase]</span>
-      <span id="precdec">[decrease]</span>
-      <span id="precauto">[auto]</span>
-     </span>
+      <span id="precinc" class="action">[increase]</span>
+      <span id="precdec" class="action">[decrease]</span>
+      <span id="precauto" class="action">[auto]</span>
     </form>
     <div id="map" class="smallmap"></div><div id="x">x</div>
-    <p>The code is available on <a href="https://github.com/vrandezo/valueparser">Github</a>.</p<
     </p>
   </div>
+     <br>
+     <span id="runtests" class="action" style="column-break-before:always">[run tests]</span>
+     <div id="tests"></div>
+     <br>
+    <p>The code is available on <a href="https://github.com/vrandezo/valueparser">Github</a>.</p>
  </body>
 </html>
