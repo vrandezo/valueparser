@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+ <head>
+  <meta charset="utf-8">
+  <title>Value parser: Item</title>
+  <link rel="stylesheet" href="lib/jquery.ui.theme.css" />
+  <link rel="stylesheet" href="lib/jquery.ui.resizable.css" />
+  <link rel="stylesheet" href="lib/jquery.ui.autocomplete.css" />
+  <link rel="stylesheet" href="lib/jquery.ui.suggester.css" />
+  <link rel="stylesheet" href="lib/jquery.ui.entityselector.css" />
+  <script src="lib/json2.js"></script>
+  <script src="lib/jquery-1.8.1.min.js"></script>
+  <script src="lib/jquery.client.js"></script>
+  <script src="lib/jquery.eachchange.js"></script>
+  <script src="lib/jquery.ui.core.js"></script>
+  <script src="lib/jquery.ui.position.js"></script>
+  <script src="lib/jquery.ui.widget.js"></script>
+  <script src="lib/jquery.ui.mouse.js"></script>
+  <script src="lib/jquery.ui.resizable.js"></script>
+  <script src="lib/jquery.ui.autocomplete.js"></script>
+  <script src="jquery.ui.suggester.js"></script>
+  <script src="jquery.ui.entityselector.js"></script>
+  <script>
+$( 'document' ).ready( function() {
+	result = null;
+	$('#in').entityselector({
+		url      : 'http://wikidata-test-repo.wikimedia.de/w/api.php',
+	//	url      : 'http://wikidata.org/w/api.php',
+		language : 'en',
+		timeout  : 20000
+	});
+	
+	$('#in').bind('entityselectorselect', function( e, ui ) {
+		result = ui.item;
+		console.log('selected: ' + JSON.stringify(result, null, 2));
+		if (result !== null) {
+			$('#out').html('You selected <a href="' + result.url + '">' + result.label + '</a>.'
+				+ '<br>' + result.description + '<br>' + result.id);
+		} else {
+			$('#out').html('You selected nothing.');
+		}
+	});
+} );
+  </script>	
+  <style>
+	body {
+    	background: #fff;
+	    font: 100.01% "Fontin Sans", Fontin-Sans, "Myriad Pro", "Lucida Grande", "Lucida Sans Unicode", Lucida, Verdana, Helvetica, sans-serif;
+    	color: #000;
+	    margin: 20px 20px 40px 40px;
+    	padding: 0;
+	    text-align: left;
+	}
+	.in {
+		width: 600px;
+	}
+	.action {
+		font-size  : 60%;
+		color : blue;
+	}
+	a {
+		text-decoration : none;
+	}
+  </style>
+ </head>
+ <body>
+  <h1>Search Wikidata</h1>
+  <p>
+   This demo is searching in the
+   <a href="http://wikidata-test-repo.wikimedia.de">Wikidata test repository</a>.
+   Feel free to add items and change them on the test repository in order to test out
+   this search.
+  </p>
+  <p>
+   <input type="text" id="in" class="in" name="in" autofocus placeholder="Find something" style="font-size:200%" />
+  </p>
+  <p>&nbsp;</p>
+  <p id="out">
+   You selected nothing.
+  </p>
+ </body>
+</html>

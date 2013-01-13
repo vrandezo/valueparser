@@ -3,8 +3,8 @@
  <head>
   <meta charset="utf-8">
   <title>Value parser: Coordinate</title>
-  <script type="text/javascript" src="jquery-1.8.1.min.js"></script>          
-  <script type="text/javascript" src="json2.js"></script>        
+  <script type="text/javascript" src="lib/jquery-1.8.1.min.js"></script>          
+  <script type="text/javascript" src="lib/json2.js"></script>        
   <script type="text/javascript" src="coordinate.js"></script>
   <script src="http://openlayers.org/api/2.12/OpenLayers.js"></script>
   <script type="text/javascript">                                         
@@ -133,6 +133,11 @@ $(document).ready(function() {
 				'input' : '52°15\'23.2133" N 13°12\'23" E',
 				'latitude' : '52.256448138888885',
 				'longitude' : '13.206388888888888'
+			},
+			{
+				'input' : 'N 48° 22.250 E 010° 53.777',
+				'latitude' : '48.37083333333334',
+				'longitude' : '10.896283333333333'
 			},
 			{
 				'input' : '52°N,13°E',
